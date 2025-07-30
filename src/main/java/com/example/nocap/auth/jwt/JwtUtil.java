@@ -11,11 +11,14 @@ import java.util.Date;
 @Component
 public class JwtUtil {
     private SecretKey secretKey;
+    private final long expirationMs;
 
-    public JwtUtil(@Value("${spring.jwt.secret}")String secret) {
+    public JwtUtil(
+            @Value("${jwt.secret}")String secret,
+            @Value("${jwt.access-token-expiration-ms}")long expirationMs) {
 
-
-        secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.expirationMs = expirationMs;
     }
 
     public String getUsername(String token) {

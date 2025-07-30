@@ -13,49 +13,47 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.util.Collection;
 import java.util.Iterator;
-
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
     public LoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
-
+        super.setAuthenticationManager(authenticationManager);
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+
+
+    }
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest req,
+                                                HttpServletResponse res)
+            throws AuthenticationException {
+        String username = req.getParameter("userId");
+        String password = req.getParameter("userPw");
+        System.out.println("[LoginFilter] attemptAuthentication → username=" + username + ", password=" + password);
+        return authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password)
+        );
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-
-        String username = obtainUsername(request);
-        String password = obtainPassword(request);
-
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
-
-        return authenticationManager.authenticate(authToken);
+    protected void successfulAuthentication(HttpServletRequest req,
+                                            HttpServletResponse res,
+                                            FilterChain chain,
+                                            Authentication auth) {
+        System.out.println("[LoginFilter] successfulAuthentication 호출됨");
+        CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+        String role = auth.getAuthorities().iterator().next().getAuthority();
+        String token = jwtUtil.createJwt(user.getUsername(), role, 60 * 60 * 10L);
+        res.addHeader("Authorization", "Bearer " + token);
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
-
-        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        String username = customUserDetails.getUsername();
-
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-        GrantedAuthority auth = iterator.next();
-
-        String role = auth.getAuthority();
-
-        String token = jwtUtil.createJwt(username, role, 60*60*10L);
-
-        response.addHeader("Authorization", "Bearer " + token);
+    protected void unsuccessfulAuthentication(HttpServletRequest req,
+                                              HttpServletResponse res,
+                                              AuthenticationException failed) {
+        System.out.println("[LoginFilter] unsuccessfulAuthentication 호출됨: " + failed.getMessage());
+        res.setStatus(401);
     }
 
-    @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-
-        response.setStatus(401);
-    }
 }
