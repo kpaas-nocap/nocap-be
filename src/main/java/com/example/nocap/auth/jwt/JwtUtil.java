@@ -1,6 +1,7 @@
 package com.example.nocap.auth.jwt;
 
 import io.jsonwebtoken.Jwts;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
     private SecretKey secretKey;
+   @Getter
     private final long expirationMs;
 
     public JwtUtil(

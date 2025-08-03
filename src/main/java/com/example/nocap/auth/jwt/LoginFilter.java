@@ -44,7 +44,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         System.out.println("[LoginFilter] successfulAuthentication 호출됨");
         CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
         String role = auth.getAuthorities().iterator().next().getAuthority();
-        String token = jwtUtil.createJwt(user.getUsername(), role, 60 * 60 * 10L);
+        String token = jwtUtil.createJwt(user.getUsername(), role, jwtUtil.getExpirationMs());
         res.addHeader("Authorization", "Bearer " + token);
     }
 
