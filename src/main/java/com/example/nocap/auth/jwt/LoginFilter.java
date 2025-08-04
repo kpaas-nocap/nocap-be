@@ -21,8 +21,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         super.setAuthenticationManager(authenticationManager);
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-
-
     }
     @Override
     public Authentication attemptAuthentication(HttpServletRequest req,

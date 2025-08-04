@@ -23,17 +23,18 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse res, Authentication auth)
             throws IOException {
         CustomOAuth2User user = (CustomOAuth2User) auth.getPrincipal();
+        long expiration = jwtUtil.getExpirationMs();
         String token = jwtUtil.createJwt(user.getName(),
                 auth.getAuthorities().iterator().next().getAuthority(),
-                60 * 60 * 1000L);
+                expiration);
 
         Cookie cookie = new Cookie("Authorization", "Bearer" + token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(60 * 60);
+        cookie.setMaxAge((int)(expiration / 1000));
         res.addCookie(cookie);
 
-        // 프론트 URL로 리다이렉트
+        // URL로 리다이렉트
         getRedirectStrategy().sendRedirect(req, res, "http://localhost:3000");
     }
 }

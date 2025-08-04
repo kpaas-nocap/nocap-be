@@ -56,14 +56,13 @@ public class SecurityConfig {
             @Override
             protected boolean shouldNotFilter(HttpServletRequest req) {
                 String p = req.getServletPath();
-                return p.startsWith("/api/nocap/auth/")       // login/signup
-                        || p.startsWith("/oauth2/authorization/") // 카카오 인가 시작
-                        || p.startsWith("/api/v1/oauth2/");       // 콜백
+                return p.startsWith("/api/nocap/auth/")
+                        || p.startsWith("/oauth2/authorization/")
+                        || p.startsWith("/api/v1/oauth2/");
             }
         };
 
         http
-                // REST API 모드: UI 리다이렉트 전부 끔
                 .csrf(cs -> cs.disable())
                 .formLogin(fl -> fl.disable())
                 .httpBasic(b -> b.disable())
@@ -71,16 +70,14 @@ public class SecurityConfig {
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
-                // 커스텀 필터
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 
-                // OAuth2 로그인: 인가 요청만 302로 던지고, 실패/인증 필요 시 401
                 .oauth2Login(oauth2 -> oauth2
-                        // 302 시작 URL
+                        // 302 시작
                         .authorizationEndpoint(authz ->
                                 authz.baseUri("/oauth2/authorization"))
-                        // 카카오가 돌아오는 콜백 URL
+                        // 콜백
                         .redirectionEndpoint(redir ->
                                 redir.baseUri("/api/v1/oauth2/*"))
                         .userInfoEndpoint(u -> u.userService(oauth2UserService))
@@ -89,13 +86,11 @@ public class SecurityConfig {
                                 res.sendError(HttpServletResponse.SC_UNAUTHORIZED))
                 )
 
-                // 인증 실패(로그인 안 된 상태로 보호된 API 호출) 시 401 리턴
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, authEx) ->
                                 res.sendError(HttpServletResponse.SC_UNAUTHORIZED))
                 )
 
-                // 허용할 API
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(
                                 "/api/nocap/auth/signup",
@@ -106,7 +101,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
         ;
-
         return http.build();
     }
 }
