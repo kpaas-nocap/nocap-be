@@ -48,6 +48,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Copy application.yml to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "src/main/resources/application.yml"
+          target: "/home/ubuntu/nocap-be/src/main/resources/application.yml"
 
       - name: Prepare SSH key
         run: |
@@ -70,4 +78,5 @@ jobs:
             docker run -d \
               --name nocap-be \
               -p 80:8080 \
+              -v /home/ubuntu/nocap-be/src/main/resources/application.yml:/app/config/application.yml \
               ${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:latest
