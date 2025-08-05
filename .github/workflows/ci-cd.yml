@@ -58,13 +58,17 @@ jobs:
       - name: Add server to known_hosts
         run: ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: SSH & deploy container
+      - name: SSH & deploy container with rollback
         uses: appleboy/ssh-action@v0.1.9
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
+            # 현재 이미지 id 저장
+            PREV_IMAGE=$(docker images --filter=reference="${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:latest" --format '{{.ID}}')
+            
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:latest
             docker rm -f nocap-be || true
             docker run -d \
@@ -72,3 +76,21 @@ jobs:
               -p 80:8080 \
               -v /home/ubuntu/nocap-be/src/main/resources/application.yml:/app/config/application.yml \
               ${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:latest
+            
+            sleep 10
+            RUNNING=$(docker inspect -f '{{.State.Running}}' nocap-be)
+            
+            if [ "$RUNNING" != "true" ]; then
+              echo "컨테이너 시작 실패. 이전 버전으로 롤백"
+              docker rm -f nocap-be || true
+
+              docker run -d \
+                --name nocap-be \
+                -p 80:8080 \
+                -v /home/ubuntu/nocap-be/src/main/resources/application.yml:/app/config/application.yml \
+                $PREV_IMAGE
+            else
+              echo "새 컨테이너가 정상 실행되었습니다."
+            fi
+
+            docker image prune -af
