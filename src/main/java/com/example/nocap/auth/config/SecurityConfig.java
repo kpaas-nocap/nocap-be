@@ -96,7 +96,8 @@ public class SecurityConfig {
                                 "/api/nocap/auth/signup",
                                 "/api/nocap/auth/login",
                                 "/oauth2/authorization/**",
-                                "/api/v1/oauth2/**"
+                                "/api/v1/oauth2/**",
+                                "/api/analysis" // 테스트용 전체 허용
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
