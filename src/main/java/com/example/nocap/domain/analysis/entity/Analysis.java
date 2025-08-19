@@ -33,12 +33,4 @@ public class Analysis {
 
     private LocalDateTime date;
 
-    @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL)
-    private List<Comment> comments;
-
-    @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL)
-    private List<News> relatedNews;
-
-    @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL)
-    private List<MainNews> mainNews;
 }
