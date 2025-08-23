@@ -39,6 +39,16 @@ public class Analysis {
     @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL)
     private List<News> relatedNews;
 
-    @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL)
-    private List<MainNews> mainNews;
+    @OneToOne(mappedBy = "analysis", cascade = CascadeType.ALL)
+    private MainNews mainNews;
+
+    public void setMainNews(MainNews mainNews) {
+        this.mainNews = mainNews;
+        mainNews.setAnalysis(this);
+    }
+
+    public void setRelatedNews(List<News> relatedNews) {
+        this.relatedNews = relatedNews;
+        relatedNews.forEach(news -> news.setAnalysis(this));
+    }
 }
