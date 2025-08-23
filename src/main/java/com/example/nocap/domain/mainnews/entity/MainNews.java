@@ -17,7 +17,7 @@ public class MainNews {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long newsId;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "AnalysisID", nullable = false)
     private Analysis analysis;
 
