@@ -58,7 +58,9 @@ public class SecurityConfig {
                 String p = req.getServletPath();
                 return p.startsWith("/api/nocap/auth/")
                         || p.startsWith("/oauth2/authorization/")
-                        || p.startsWith("/api/v1/oauth2/");
+                        || p.startsWith("/api/v1/oauth2/")
+                        || p.startsWith("/api/nocap/analysis/"); //테스트용 추가
+
             }
         };
 
@@ -97,7 +99,7 @@ public class SecurityConfig {
                                 "/api/nocap/auth/login",
                                 "/oauth2/authorization/**",
                                 "/api/v1/oauth2/**",
-                                "/api/analysis" // 테스트용 전체 허용
+                                "/api/nocap/analysis" // 테스트용 전체 허용
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
