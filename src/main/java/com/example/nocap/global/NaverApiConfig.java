@@ -1,4 +1,4 @@
-package com.example.nocap.domain.analysis.config;
+package com.example.nocap.global;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
