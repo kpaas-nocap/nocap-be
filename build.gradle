@@ -60,6 +60,11 @@ dependencies {
     // MapStruct 코드 생성기
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
+    // AWS SDK for Java v2 - Lambda Client
+    implementation platform('software.amazon.awssdk:bom:2.25.46')
+    implementation 'software.amazon.awssdk:lambda'
+    implementation 'software.amazon.awssdk:apache-client'
+
 }
 
 dependencyManagement {
