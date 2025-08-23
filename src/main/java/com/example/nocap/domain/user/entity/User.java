@@ -28,18 +28,6 @@ public class User {
     private String username;
     private String role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<History> histories;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Analysis> analyses;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Comment> comments;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Bookmark> bookmarks;
-
     public static User from (SignupDto dto){
         return User.builder()
                 .userId(dto.getUserId())
