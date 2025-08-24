@@ -25,7 +25,7 @@ public class User {
     public static User from (SignupRequest dto){
         return User.builder()
                 .userId(dto.getNickname())
-                .role("USER")
+                .role("ROLE_USER")
                 .build();
     }
 }

@@ -45,9 +45,15 @@ public class JwtUtil {
                 .parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
+    public Long getId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build()
+                .parseSignedClaims(token).getPayload().get("id", Long.class);
+    }
+
     public String createJwt(User user, Long expiredMs) {
         return Jwts.builder()
-                .claim("userId", user.getUserId()) // email → userId
+                .claim("id",user.getId())
+                .claim("userId", user.getUserId()) // 우리는 아이디가
                 .claim("role", user.getRole())
                 .claim("isTmp", false)
                 .issuedAt(new Date(System.currentTimeMillis()))

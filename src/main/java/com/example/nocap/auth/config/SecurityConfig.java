@@ -27,9 +27,9 @@ import java.util.List;
 public class SecurityConfig {
 
     public static final String[] ALLOWEDURLS = {
-            "/auth/login",
+            "/auth/kakao/**",
             "/auth/login/kakao",
-            "/auth/signup",
+            "/auth/form/**",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/swagger-resources/**"

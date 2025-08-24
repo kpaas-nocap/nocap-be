@@ -1,5 +1,7 @@
 package com.example.nocap.auth.service;
 
+import com.example.nocap.auth.dto.FormLoginRequest;
+import com.example.nocap.auth.dto.request.FormSignupRequest;
 import com.example.nocap.auth.kakao.KakaoUserInfoResponseDto;
 import com.example.nocap.auth.kakao.KakaoUtil;
 import com.example.nocap.auth.dto.request.SignupRequest;
@@ -67,5 +69,27 @@ public class AuthService {
         httpServletResponse.setHeader("Authorization", newToken);
 
         return new UserResponse(newUser, true);
+    }
+
+    public UserResponse formSignup(FormSignupRequest req, HttpServletResponse httpServletResponse) {
+        if (userRepository.existsByUserId(req.getUserId())) throw new RuntimeException("이미 존재합니다.");
+        User newUser = User.builder()
+                .userId(req.getUserId())
+                .username(req.getUsername())
+                .userPw(passwordEncoder.encode(req.getPassword()))
+                .role("ROLE_USER")
+                .build();
+        userRepository.save(newUser);
+        String token = jwtUtil.createJwt(newUser, 60 * 60 * 1000L);
+        httpServletResponse.setHeader("Authorization", "Bearer " + token);
+        return new UserResponse(newUser, true);
+    }
+
+    public UserResponse formLogin(FormLoginRequest req, HttpServletResponse httpServletResponse) {
+        User user = userRepository.findByUserId(req.getUserId()).orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+        if (!passwordEncoder.matches(req.getPassword(), user.getUserPw())) throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        String token = jwtUtil.createJwt(user, 60 * 60 * 1000L);
+        httpServletResponse.setHeader("Authorization", "Bearer " + token);
+        return new UserResponse(user, true);
     }
 }

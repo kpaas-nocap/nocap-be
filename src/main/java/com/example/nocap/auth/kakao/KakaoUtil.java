@@ -49,7 +49,7 @@ public class KakaoUtil {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, r ->
                         r.bodyToMono(String.class).map(body -> {
-                            log.error("카카오 토큰 발급 실패: {}", body);   // 🔴 에러 응답 그대로 찍음
+                            log.error("카카오 토큰 발급 실패: {}", body);
                             return new CustomException(ErrorCode.EXTERNAL_API_ERROR);
                         })
                 )
