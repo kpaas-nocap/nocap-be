@@ -13,10 +13,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class CrawlingService {
 
-    /**
-     * NewsResponse 에 담긴 각 아이템의 originallink 로 크롤링을 수행하여
-     * CrawledNewsResponse 로 반환
-     */
+     //NewsResponse 에 담긴 각 아이템의 originallink 로 크롤링을 수행하여
+     //CrawledNewsResponse 로 반환
     public CrawledResponseDto crawlNews(NewsSearchResponseDto newsSearchResponseDto) {
         List<NewsDto> crawledNews = new ArrayList<>();
 
@@ -36,16 +34,17 @@ public class CrawlingService {
             } catch (IOException e) {
                 fullText = "[크롤링 실패] " + e.getMessage();
             }
-
-            crawledNews.add(new NewsDto(
-                url,
-                item.getTitle(),
-                fullText
-            ));
+            if (fullText != null && !fullText.trim().isEmpty()) { // 빈 문자열을 내보내지 않도록
+                crawledNews.add(new NewsDto(
+                    url,
+                    item.getTitle(),
+                    fullText
+                ));
+            }
         }
 
         return CrawledResponseDto.builder()
-            .newsDtoList(crawledNews) // 빌더를 통해 값을 설정
+            .newsDtos(crawledNews) // 빌더를 통해 값을 설정
             .build();                 // build() 메소드로 객체 생성
     }
 }
