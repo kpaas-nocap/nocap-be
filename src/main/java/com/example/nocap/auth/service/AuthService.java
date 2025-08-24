@@ -38,19 +38,19 @@ public class AuthService {
         if (optional.isPresent()) {
             User user = optional.get();
             String token = jwtUtil.createJwt(user, 60 * 60 * 1000L);
-            httpServletResponse.setHeader("Authorization", token);
+            httpServletResponse.setHeader("Authorization", "Bearer " +token);
             log.info("token: {}", token);
             return new UserResponse(user, true);
         }
 
-        String tmptoken = jwtUtil.createPreRegisterToken(email, 10 * 60 * 1000L);
-        httpServletResponse.setHeader("Authorization", tmptoken);
+        String tmptoken = jwtUtil.createPreRegisterToken(email, 60 * 60 * 1000L);
+        httpServletResponse.setHeader("Authorization", "Bearer " + tmptoken);
         log.info("tmptoken: {}", tmptoken);
         return new UserResponse(null, false);
     }
 
     public UserResponse signup(SignupRequest signupRequest, String token, HttpServletResponse httpServletResponse) {
-        String email = jwtUtil.getUsername(token); // Email → userId
+        String email = jwtUtil.getUserId(token); // Email → userId
 
         if (userRepository.existsByUserId(email)) throw new RuntimeException("이미 존재합니다.");
 

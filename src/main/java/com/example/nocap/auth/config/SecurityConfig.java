@@ -46,6 +46,11 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+    /*
+        setAllowCredentials 있으면 setAllowedOrigins에 와일드카드 말고
+        프런트 도메인 직접 명시 필요 -> 나중에 나오면 ~
+    */
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();

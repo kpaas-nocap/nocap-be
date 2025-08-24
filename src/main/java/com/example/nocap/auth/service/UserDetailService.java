@@ -17,8 +17,8 @@ public class UserDetailService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        return userRepository.findByUsername(userId)
                 .map(UserDetail::new)
                 .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 회원입니다."));
     }

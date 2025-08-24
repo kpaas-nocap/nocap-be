@@ -24,6 +24,12 @@ public class JwtUtil {
                 .parseSignedClaims(token).getPayload().get("username", String.class);
     }
 
+    public String getUserId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build()
+                .parseSignedClaims(token).getPayload().get("userId", String.class);
+    }
+
+
     public String getRole(String token) {
         return Jwts.parser().verifyWith(secretKey).build()
                 .parseSignedClaims(token).getPayload().get("role", String.class);
@@ -41,7 +47,7 @@ public class JwtUtil {
 
     public String createJwt(User user, Long expiredMs) {
         return Jwts.builder()
-                .claim("username", user.getUserId()) // email → userId
+                .claim("userId", user.getUserId()) // email → userId
                 .claim("role", user.getRole())
                 .claim("isTmp", false)
                 .issuedAt(new Date(System.currentTimeMillis()))

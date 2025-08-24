@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -35,32 +36,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = authorization.split(" ")[1];
+        String token = authorization.substring(7);
 
-        if (jwtUtil.isExpired(token)) {
+        try {
+            if (jwtUtil.isExpired(token)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            String userId = jwtUtil.getUserId(token);
+            if (userId == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            User user = userRepository.findByUserId(userId).orElse(null);
+            if (user == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            boolean isTmp = jwtUtil.isTmp(token);
+            if (!isTmp) {
+                UserDetail userDetails = new UserDetail(user);
+                Authentication authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        } catch (JwtException | IllegalArgumentException e) {
             filterChain.doFilter(request, response);
             return;
-        }
-
-        String userId = jwtUtil.getUsername(token);
-        User user = userRepository.findByUserId(userId).orElse(null);
-        if (user == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        boolean isTmp = jwtUtil.isTmp(token);
-
-        if (user == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        if (!isTmp) {
-            UserDetail userDetails = new UserDetail(user);
-            Authentication authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities()
-            );
-            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
         filterChain.doFilter(request, response);
