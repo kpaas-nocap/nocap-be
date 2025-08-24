@@ -30,9 +30,13 @@ public class UserDetail implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return user.getUserId();
     }
 
+    //혹시나 해서 만들어 둠
+    public String getNickName() {
+        return user.getUsername();
+    }
     @Override
     public boolean isAccountNonExpired() {
         return true;
@@ -52,4 +56,6 @@ public class UserDetail implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+    //User PK
+    public Long getId() { return user.getId(); }
 }
