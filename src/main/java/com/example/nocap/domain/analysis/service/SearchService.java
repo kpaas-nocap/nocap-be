@@ -1,6 +1,6 @@
 package com.example.nocap.domain.analysis.service;
 
-import com.example.nocap.domain.analysis.config.NaverApiConfig;
+import com.example.nocap.global.NaverApiConfig;
 import com.example.nocap.domain.analysis.dto.NewsSearchRequestDto;
 import com.example.nocap.domain.analysis.dto.NewsSearchResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,7 +38,7 @@ public class SearchService {
         /// 3. 제목 HTML 태그 제거
         sanitizeItems(newsSearchResponseDto);
         // 4. excludeTitle 검사 및 최종 DTO 반환
-        return excludeOrTrim(newsSearchResponseDto, newsSearchRequestDto.getExcludeTitle());
+        return excludeOrTrim(newsSearchResponseDto, newsSearchRequestDto.getExcludeTitle(), newsSearchRequestDto.getExcludeUrl());
     }
     private void sanitizeItems(NewsSearchResponseDto newsSearchResponseDto) {
         if (newsSearchResponseDto.getItems() == null) return;
@@ -46,13 +46,11 @@ public class SearchService {
         for (NewsSearchResponseDto.Item item : newsSearchResponseDto.getItems()) {
             // 제목에서 태그 제거
             if (item.getTitle() != null) {
-                String plainTitle = Jsoup.parse(item.getTitle()).text();
-                item.setTitle(plainTitle);
+                item.setTitle(Jsoup.parse(item.getTitle()).text());
             }
             // (선택) description 에서도 태그 제거가 필요하면 아래 추가
             if (item.getDescription() != null) {
-                String plainDesc = Jsoup.parse(item.getDescription()).text();
-                item.setDescription(plainDesc);
+                item.setDescription(Jsoup.parse(item.getDescription()).text());
             }
         }
     }
@@ -75,7 +73,7 @@ public class SearchService {
 
         String apiURL = "https://openapi.naver.com/v1/search/news.json"
             + "?query=" + query
-            + "&display=" + 11
+            + "&display=" + 6
             + "&start=1"
             + "&sort=sim";
 
@@ -122,19 +120,20 @@ public class SearchService {
         }
     }
 
-    private NewsSearchResponseDto excludeOrTrim(NewsSearchResponseDto resp, String excludeTitle) {
+    private NewsSearchResponseDto excludeOrTrim(NewsSearchResponseDto resp, String excludeTitle, String excludeUrl) {
+
+        if (resp.getItems() == null) return resp;
         // 1. 원본 리스트 복사
         List<NewsSearchResponseDto.Item> items = new ArrayList<>(resp.getItems());
 
         // 2. HTML 태그 제거한 텍스트로 비교해서 제거
-        boolean removed = items.removeIf(item -> {
+        boolean removed = items.removeIf(item ->
             // <b>태그 등 HTML 제거
-            String plainTitle = Jsoup.parse(item.getTitle()).text();
-            return plainTitle.equals(excludeTitle);
-        });
+            item.getTitle().equals(excludeTitle) || item.getOriginallink().equals(excludeUrl)
+        );
 
         // 3. 중복 제거된 게 없고, 11개 이상일 때 마지막 하나만 제거
-        if (!removed && items.size() > 10) {
+        if (!removed && items.size() > 5) {
             items.remove(items.size() - 1);
         }
 
