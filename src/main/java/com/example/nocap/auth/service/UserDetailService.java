@@ -1,25 +1,25 @@
 package com.example.nocap.auth.service;
 
-import com.example.nocap.auth.dto.CustomUserDetails;
-import com.example.nocap.domain.user.entity.User;
 import com.example.nocap.domain.user.repository.UserRepository;
+import com.example.nocap.auth.dto.response.UserDetail;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
+@RequiredArgsConstructor
+@Slf4j
+public class UserDetailService implements UserDetailsService {
+
     private final UserRepository userRepository;
-    public CustomUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        User user = userRepository.findByUserId(userId);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found: " + userId);
-        }
-        return new CustomUserDetails(user);
+        return userRepository.findByUserId(userId)
+                .map(UserDetail::new)
+                .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 회원입니다."));
     }
 }
