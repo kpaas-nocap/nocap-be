@@ -26,7 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    public static final String[] ALLOWEDURLS = {
+    public static final String[] ALLOWED_URLS = {
             "/auth/kakao/**",
             "/auth/login/kakao",
             "/auth/form/**",
@@ -78,7 +78,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(ALLOWEDURLS).permitAll()
+                        .requestMatchers(ALLOWED_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint()))
