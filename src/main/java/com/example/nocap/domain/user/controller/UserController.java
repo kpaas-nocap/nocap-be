@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/nocap/user")
-public class UserController {
+public class UserController implements UserSwagger{
     private final UserService userService;
 
     @GetMapping("/me")
