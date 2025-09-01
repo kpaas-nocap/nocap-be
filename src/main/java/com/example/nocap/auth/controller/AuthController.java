@@ -16,8 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
-@Tag(name = "Auth", description = "로그인 관련 API")
-public class AuthController {
+public class AuthController implements AuthSwagger{
 
     private final AuthService authService;
 
@@ -28,7 +27,6 @@ public class AuthController {
     private String redirectUri;
 
     @GetMapping("kakao/login")
-    @Operation(summary = "카카오 로그인 URL 발급")
     public ResponseEntity<String> getKakaoLoginUrl() {
         String kakaoLoginUrl = "https://kauth.kakao.com/oauth/authorize"
                 + "?response_type=code"
@@ -39,7 +37,6 @@ public class AuthController {
     }
 
     @PostMapping("kakao/signup")
-    @Operation(summary = "카카오 로그인 제외 username 필요")
     public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest,
                                     @RequestHeader("Authorization") String tmptoken,
                                     HttpServletResponse httpServletResponse
@@ -49,19 +46,16 @@ public class AuthController {
     }
 
     @GetMapping("/login/kakao")
-    @Operation(summary = "카카오 로그인 처리")
     public ResponseEntity<?> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
         return ResponseEntity.ok(authService.oAuthLogin(accessCode, httpServletResponse));
     }
 
     @PostMapping("/form/signup")
-    @Operation(summary = "폼 회원가입")
     public ResponseEntity<?> formSignup(@RequestBody FormSignupRequest req, HttpServletResponse httpServletResponse) {
         return ResponseEntity.ok(authService.formSignup(req, httpServletResponse));
     }
 
     @PostMapping("/form/login")
-    @Operation(summary = "폼로그인")
     public ResponseEntity<?> formLogin(@RequestBody FormLoginRequest req, HttpServletResponse httpServletResponse) {
         return ResponseEntity.ok(authService.formLogin(req, httpServletResponse));
     }
