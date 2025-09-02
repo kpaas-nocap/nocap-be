@@ -32,6 +32,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/swagger-resources/**"
+
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Bean
