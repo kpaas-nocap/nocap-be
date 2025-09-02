@@ -26,12 +26,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     public static final String[] ALLOWED_URLS = {
-            "/auth/kakao/**",
-            "/auth/login/kakao",
-            "/auth/form/**",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/swagger-resources/**"
+            "/auth/kakao/**", "/auth/login/kakao",
+            "/auth/form/**", "/swagger-ui/**", "/swagger-ui.html",
+            "/v3/api-docs/**", "/v3/api-docs", "/swagger-resources/**" , "/webjars/**"
+
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Bean
