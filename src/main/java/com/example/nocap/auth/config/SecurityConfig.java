@@ -25,7 +25,6 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
     public static final String[] ALLOWED_URLS = {
             "/auth/kakao/**",
             "/auth/login/kakao",
@@ -35,22 +34,18 @@ public class SecurityConfig {
             "/swagger-resources/**"
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-
     /*
         setAllowCredentials 있으면 setAllowedOrigins에 와일드카드 말고
         프런트 도메인 직접 명시 필요 -> 나중에 나오면 ~
     */
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -63,14 +58,10 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-
-
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return new CustomAuthenticationEntryPoint();
     }
-
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
