@@ -65,6 +65,9 @@ dependencies {
     implementation 'software.amazon.awssdk:lambda'
     implementation 'software.amazon.awssdk:apache-client'
 
+    // Fast API - WebClient
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 }
 
 dependencyManagement {
