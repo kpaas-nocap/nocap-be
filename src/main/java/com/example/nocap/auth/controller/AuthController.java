@@ -1,25 +1,60 @@
 package com.example.nocap.auth.controller;
 
-import com.example.nocap.auth.dto.SignupDto;
+
+import com.example.nocap.auth.dto.FormLoginRequest;
+import com.example.nocap.auth.dto.request.FormSignupRequest;
+import com.example.nocap.auth.dto.request.SignupRequest;
 import com.example.nocap.auth.service.AuthService;
-import com.example.nocap.domain.user.dto.UserDto;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/nocap/auth")
-public class AuthController {
-    private final AuthService authservice;
+@RequestMapping("/auth")
+public class AuthController implements AuthSwagger{
 
-    @PostMapping("/signup")
-    public ResponseEntity<UserDto> signup(@RequestBody SignupDto signupDto){
-        UserDto signed = authservice.signUp(signupDto);
-        return ResponseEntity.ok(signed);
+    private final AuthService authService;
+
+    @Value("${spring.kakao.auth.client}")
+    private String clientId;
+
+    @Value("${spring.kakao.auth.redirect}")
+    private String redirectUri;
+
+    @GetMapping("kakao/login")
+    public ResponseEntity<String> getKakaoLoginUrl() {
+        String kakaoLoginUrl = "https://kauth.kakao.com/oauth/authorize"
+                + "?response_type=code"
+                + "&client_id=" + clientId
+                + "&redirect_uri=" + redirectUri;
+
+        return ResponseEntity.ok(kakaoLoginUrl);
     }
 
+    @PostMapping("kakao/signup")
+    public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest,
+                                    @RequestHeader("Authorization") String tmptoken,
+                                    HttpServletResponse httpServletResponse
+    ) {
+        String token = tmptoken.replace("Bearer ", "").trim();
+        return ResponseEntity.ok(authService.signup(signupRequest, token, httpServletResponse));
+    }
+
+    @GetMapping("/login/kakao")
+    public ResponseEntity<?> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
+        return ResponseEntity.ok(authService.oAuthLogin(accessCode, httpServletResponse));
+    }
+
+    @PostMapping("/form/signup")
+    public ResponseEntity<?> formSignup(@RequestBody FormSignupRequest req, HttpServletResponse httpServletResponse) {
+        return ResponseEntity.ok(authService.formSignup(req, httpServletResponse));
+    }
+
+    @PostMapping("/form/login")
+    public ResponseEntity<?> formLogin(@RequestBody FormLoginRequest req, HttpServletResponse httpServletResponse) {
+        return ResponseEntity.ok(authService.formLogin(req, httpServletResponse));
+    }
 }

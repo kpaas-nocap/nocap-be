@@ -9,6 +9,6 @@ import lombok.Data;
 @Builder
 public class CrawledResponseDto {
 
-    private List<NewsDto> newsDtoList;
+    private List<NewsDto> newsDtos;
 
 }

@@ -13,6 +13,6 @@ public class SbertRequestDto {
     private String plan;
     private String category;
     private MainNewsDto mainNewsDto;
-    private List<NewsDto> newsDtoList;
+    private List<NewsDto> newsDtos;
 
 }
