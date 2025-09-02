@@ -56,9 +56,6 @@ public class UserDetail implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-<<<<<<< HEAD:src/main/java/com/example/nocap/auth/dto/response/UserDetail.java
     //User PK
     public Long getId() { return user.getId(); }
-=======
->>>>>>> f7b273cbb9f9d4cbd4809fe55c1fd4d0f78976a6:src/main/java/com/example/nocap/auth/dto/CustomUserDetails.java
 }
