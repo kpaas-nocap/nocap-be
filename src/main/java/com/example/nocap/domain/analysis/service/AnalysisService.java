@@ -1,6 +1,5 @@
 package com.example.nocap.domain.analysis.service;
 
-import com.example.nocap.auth.dto.CustomUserDetails;
 import com.example.nocap.domain.analysis.dto.AnalysisViewDto;
 import com.example.nocap.domain.analysis.mapper.AnalysisMapper;
 import com.example.nocap.domain.analysis.dto.AnalysisDto;
