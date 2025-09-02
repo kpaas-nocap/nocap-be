@@ -1,4 +1,4 @@
-package com.example.nocap.auth.dto;
+package com.example.nocap.auth.dto.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

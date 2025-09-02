@@ -1,6 +1,6 @@
 package com.example.nocap.auth.service;
 
-import com.example.nocap.auth.dto.FormLoginRequest;
+import com.example.nocap.auth.dto.request.FormLoginRequest;
 import com.example.nocap.auth.dto.request.FormSignupRequest;
 import com.example.nocap.auth.kakao.KakaoUserInfoResponseDto;
 import com.example.nocap.auth.kakao.KakaoUtil;
