@@ -12,6 +12,7 @@ import com.example.nocap.domain.analysis.service.AnalysisService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,8 +33,21 @@ public class AnalysisController {
     private final AnalysisProcessService analysisProcessService;
     private final AnalysisService analysisService;
 
+    @GetMapping("/healthCheck")
+    public ResponseEntity<Void> healthCheck() {
+        boolean isHealthy = analysisProcessService.healthCheck();
+
+        if (isHealthy) {
+            // 200 OK 상태 코드로 응답하되 본문은 비움
+            return ResponseEntity.ok().build();
+        } else {
+            // 503 Service Unavailable 상태 코드로 응답
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
+    }
+
     @PostMapping
-    public ResponseEntity<SbertResponseDto> searchNews(@RequestBody AnalysisRequestDto analysisRequestDto) {
+    public ResponseEntity<SbertResponseDto> analysis (@RequestBody AnalysisRequestDto analysisRequestDto) {
 
         SbertResponseDto sbertRequestDto = analysisProcessService.analyzeUrlAndPrepareRequest(
             analysisRequestDto);

@@ -98,7 +98,8 @@ public class SecurityConfig {
                                 "/api/nocap/auth/login",
                                 "/oauth2/authorization/**",
                                 "/api/nocap/analysis",
-                                "/api/nocap/analysis/{category}"
+                                "/api/nocap/analysis/{category}",
+                                "/api/nocap/analysis/healthCheck"
                         ).permitAll()
                     .requestMatchers("/api/nocap/analysis/my/**").authenticated()
                     .anyRequest().authenticated()
