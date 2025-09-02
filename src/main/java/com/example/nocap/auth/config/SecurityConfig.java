@@ -50,8 +50,9 @@ public class SecurityConfig {
         config.setAllowedOriginPatterns(List.of(
                 "http://13.209.98.128",
                 "http://13.209.98.128:8080",
-                "http://localhost:3000"
-        ));
+                "http://localhost:3000",
+                "http://localhost:8080"
+                ));
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
