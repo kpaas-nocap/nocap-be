@@ -21,6 +21,9 @@ public class MainNews {
     @JoinColumn(name = "AnalysisID", nullable = false)
     private Analysis analysis;
 
+    @Column(unique = true, nullable = false)
+    private String canonicalUrl;
+
     private String url;
 
     private String title;
