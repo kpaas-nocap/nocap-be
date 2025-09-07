@@ -7,14 +7,19 @@ import com.example.nocap.domain.analysis.dto.NewsSearchResponseDto;
 import com.example.nocap.domain.analysis.dto.SbertRequestDto;
 import com.example.nocap.domain.analysis.dto.SbertResponseDto;
 import com.example.nocap.domain.analysis.dto.TitleCategoryDto;
+import com.example.nocap.domain.analysis.entity.Analysis;
+import com.example.nocap.domain.analysis.mapper.AnalysisMapper;
+import com.example.nocap.domain.analysis.repository.AnalysisRepository;
 import com.example.nocap.domain.mainnews.entity.MainNews;
 import com.example.nocap.domain.mainnews.mapper.MainNewsMapper;
+import com.example.nocap.domain.mainnews.repository.MainNewsRepository;
+import com.example.nocap.domain.news.mapper.NewsMapper;
+import com.example.nocap.domain.user.entity.User;
+import com.example.nocap.domain.user.repository.UserRepository;
 import com.example.nocap.exception.CustomException;
 import com.example.nocap.exception.ErrorCode;
-import com.example.nocap.global.WebClientConfig;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +27,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.services.lambda.LambdaClient;
-import software.amazon.awssdk.services.lambda.model.InvokeRequest;
-import software.amazon.awssdk.services.lambda.model.InvokeResponse;
-import software.amazon.awssdk.services.lambda.model.LambdaException;
 
 @Service
 @RequiredArgsConstructor
@@ -37,17 +37,16 @@ public class AnalysisProcessService {
     private final SearchService searchService;
     private final CrawlingService crawlingService;
     private final AnalysisSaveService analysisSaveService;
+    private final NewsMapper newsMapper;
     private final MainNewsMapper mainNewsMapper;
-
-    private final ObjectMapper objectMapper;
+    private final AnalysisMapper analysisMapper;
+    private final MainNewsRepository mainNewsRepository;
+    private final UserRepository userRepository;
 
     // Fast API 서버 호출용 추가 의존성
     private  final WebClient webClient;
 
     private static final Logger log = LoggerFactory.getLogger(AnalysisProcessService.class);
-
-    @Value("${aws.lambda.function-name}")
-    private String lambdaFunctionName;
 
     public boolean healthCheck() {
         try {
@@ -59,7 +58,6 @@ public class AnalysisProcessService {
                     response.getStatusCode().is2xxSuccessful())) // 5. 상태 코드가 2xx(성공)이면 true로 변환
                 .onErrorReturn(false)        // 6. 3번 단계 등에서 오류 발생 시 false를 반환
                 .block());                    // 7. 비동기 작업이 끝날 때까지 기다리고 최종 boolean 값 반환
-
         } catch (Exception e) {
             // .block() 에서 타임아웃 등의 예외가 발생할 경우를 대비한 최종 안전장치
             return false;
@@ -69,12 +67,40 @@ public class AnalysisProcessService {
     public SbertResponseDto analyzeUrlAndPrepareRequest(AnalysisRequestDto analysisRequestDto) {
 
         String url = analysisRequestDto.getUrl();
-        String plan = analysisRequestDto.getPlan();
         Long userId = analysisRequestDto.getUserId();
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        //String plan = user.getRole(); // NORMAL || PREMIUM
+        String plan = "PREMIUM";
 
         // 1. URL에서 메인 기사 추출
         MainNews mainNews = articleExtractionService.extract(url);
         System.out.println("추출된 기사 제목 : " + mainNews.getTitle());
+
+        Optional<MainNews> existingMainNewsOpt = mainNewsRepository.findByCanonicalUrl(mainNews.getCanonicalUrl());
+
+        if (existingMainNewsOpt.isPresent()) {
+            // 뉴스가 이미 분석된 경우
+            Analysis existingAnalysis = existingMainNewsOpt.get().getAnalysis();
+            // 유저는 프리미엄인데 분석하려는 뉴스의 비젼이 일반인 경우
+            if ("PREMIUM".equalsIgnoreCase(plan) && "NORMAL".equalsIgnoreCase(existingAnalysis.getVersion())) {
+                SbertRequestDto sbertRequestDto = SbertRequestDto.builder()
+                    .plan(plan)
+                    .category(existingAnalysis.getCategory())
+                    .mainNewsDto(mainNewsMapper.toMainNewsDto(mainNews))
+                    .newsDtos(newsMapper.toNewsDtoList(existingAnalysis.getRelatedNews()))
+                    .build();
+                SbertResponseDto sbertResponseDto = requestFastAPi(sbertRequestDto);
+                // 비교를 갱신하여 다시 저장
+                analysisSaveService.updateAnalysisData(existingAnalysis, sbertResponseDto);
+
+            }
+            // 이미 있는 분석을 반환
+            return analysisMapper.toSbertResponseDto(existingAnalysis);
+
+        }
 
         // 2. OpenAI로 새 제목/카테고리 생성
         //TitleCategoryDto titleCategoryDto = openAIService.generate(mainNews.getContent());
@@ -113,9 +139,17 @@ public class AnalysisProcessService {
             .build();
 
         // 6. FastAPI 호출
+        SbertResponseDto sbertResponseDto = requestFastAPi(sbertRequestDto);
+        assert sbertResponseDto != null;
+        analysisSaveService.saveAnalysisData(analysisRequestDto.getUserId(), mainNews,
+            sbertResponseDto);
+        return sbertResponseDto;
+    }
+
+    private SbertResponseDto requestFastAPi(SbertRequestDto sbertRequestDto) {
         SbertResponseDto sbertResponseDto;
         try {
-            sbertResponseDto = webClient.post() // POST 요청
+            return sbertResponseDto = webClient.post() // POST 요청
                 .uri("/analyze") //FastAPI 서버의 엔드포인트 경로
                 .bodyValue(sbertRequestDto)
                 .retrieve()
@@ -125,9 +159,5 @@ public class AnalysisProcessService {
             log.error("FastAPI server call failed: {}", e.getMessage());
             throw new CustomException(ErrorCode.EXTERNAL_API_ERROR);
         }
-        assert sbertResponseDto != null;
-        analysisSaveService.saveAnalysisData(analysisRequestDto.getUserId(), mainNews,
-            sbertResponseDto);
-        return sbertResponseDto;
     }
 }

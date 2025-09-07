@@ -52,8 +52,6 @@ public class AnalysisService {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        System.out.println("유저명 : " + user.getUsername());
-
         return user.getUserAnalyses().stream()
             .map(UserAnalysis::getAnalysis)      // 각 UserAnalysis 객체에서 Analysis 엔티티를 추출
             .map(analysisMapper::toAnalysisDto)  // 각 Analysis 엔티티를 AnalysisDto로 변환
