@@ -73,7 +73,7 @@ public class AnalysisController {
     @GetMapping("/my/{id}")
     public ResponseEntity<List<AnalysisDto>> getAnalysisByUserId(
         //@AuthenticationPrincipal CustomUserDetails customUserDetails)
-        Long id)
+        @PathVariable Long id)
         {
         //return ResponseEntity.ok(analysisService.getAnalysisByUserId(customUserDetails));
         return ResponseEntity.ok(analysisService.getAnalysisByUserId(id));
