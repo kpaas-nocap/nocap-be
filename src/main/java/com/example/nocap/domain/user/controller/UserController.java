@@ -11,19 +11,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/nocap/user")
-public class UserController {
+public class UserController implements UserSwagger{
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser(Authentication authentication)
-    {
-        String username = authentication.getName();
-        User user = userService.findByUsername(username);
-        UserDto dto = UserDto.builder()
-                .Id(user.getId())
-                .userId(user.getUserId())
-                .username(user.getUsername())
-                .build();
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<UserDto> getCurrentUser() {
+        return ResponseEntity.ok(userService.getMe());
     }
 }

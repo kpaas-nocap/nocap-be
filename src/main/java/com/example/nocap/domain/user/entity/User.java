@@ -1,19 +1,14 @@
 package com.example.nocap.domain.user.entity;
 
-import com.example.nocap.auth.dto.SignupDto;
-import com.example.nocap.domain.analysis.entity.Analysis;
-import com.example.nocap.domain.bookmark.entity.Bookmark;
-import com.example.nocap.domain.comment.entity.Comment;
-import com.example.nocap.domain.history.entity.History;
 import com.example.nocap.domain.useranalysis.entity.UserAnalysis;
+import com.example.nocap.auth.dto.request.SignupRequest;
 import jakarta.persistence.*;
 import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Entity
 @Data
@@ -33,12 +28,12 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAnalysis> userAnalyses = new ArrayList<>();
 
-    public static User from (SignupDto dto){
+
+    public static User from (SignupRequest dto){
+
         return User.builder()
-                .userId(dto.getUserId())
-                .userPw(dto.getUserPw())
-                .username(dto.getUsername())
-                .role("USER")
+                .userId(dto.getNickname())
+                .role("ROLE_USER")
                 .build();
     }
 }
