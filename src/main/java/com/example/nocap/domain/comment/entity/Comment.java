@@ -31,4 +31,8 @@ public class Comment {
     private String content;
 
     private LocalDateTime date;
+
+    private int recommandation;
+
+    private int nonRecommandation;
 }
