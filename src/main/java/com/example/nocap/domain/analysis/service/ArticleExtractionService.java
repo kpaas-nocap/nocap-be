@@ -4,6 +4,11 @@ import com.example.nocap.domain.mainnews.entity.MainNews;
 import com.example.nocap.exception.CustomException;
 import com.example.nocap.exception.ErrorCode;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import net.dankito.readability4j.Article;
 import net.dankito.readability4j.Readability4J;
 import org.jsoup.Jsoup;
@@ -23,8 +28,16 @@ public class ArticleExtractionService {
 
             // 기사 여부 판별 로직
             if (!isArticleByConfidenceScore(doc)) {
-                // ✨ 변경점 1: 기사가 아닐 때 BusinessException 발생
+                // 변경점 1: 기사가 아닐 때 Exception 발생
                 throw new CustomException(ErrorCode.NOT_A_NEWS_ARTICLE);
+            }
+
+            String canonicalUrl = "";
+            Element canonicalLink = doc.selectFirst("link[rel=canonical]");
+            if (canonicalLink != null && canonicalLink.hasAttr("href")) {
+                canonicalUrl = canonicalLink.attr("href");
+            } else {
+                canonicalUrl = normalizeUrl(url);
             }
 
             Element ogImageElement = doc.selectFirst("meta[property=og:image]");
@@ -37,19 +50,19 @@ public class ArticleExtractionService {
 
             return MainNews.builder()
                 .url(url)
+                .canonicalUrl(canonicalUrl)
                 .title(article.getTitle())
                 .content(plainContent)
                 .image(ogImage)
                 .build();
 
         } catch (IOException e) {
-            // ✨ 변경점 2: Jsoup 연결 실패 시 BusinessException 발생
+            // 변경점 2: Jsoup 연결 실패 시 Exception 발생
             throw new CustomException(ErrorCode.EXTERNAL_API_ERROR);
         }
     }
 
     private boolean isArticleByConfidenceScore(Document doc) {
-        // ... (이전과 동일한 점수제 판별 로직) ...
         int confidenceScore = 0;
         final int THRESHOLD = 4;
 
@@ -68,5 +81,25 @@ public class ArticleExtractionService {
         }
 
         return confidenceScore >= THRESHOLD;
+    }
+
+    private String normalizeUrl(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            String path = url.getPath();
+            String query = url.getQuery();
+            if (query == null || query.isEmpty()) {
+                return url.getProtocol() + "://" + url.getHost() + path;
+            }
+            List<String> essentialParams = List.of("article_id", "id", "no", "idx", "pno", "newsid");
+            String preservedQuery = Arrays.stream(query.split("&"))
+                .filter(param -> essentialParams.stream().anyMatch(key -> param.startsWith(key + "=")))
+                .sorted()
+                .collect(Collectors.joining("&"));
+            String baseUrl = url.getProtocol() + "://" + url.getHost() + path;
+            return preservedQuery.isEmpty() ? baseUrl : baseUrl + "?" + preservedQuery;
+        } catch (MalformedURLException e) {
+            return urlString;
+        }
     }
 }
