@@ -4,7 +4,9 @@ import com.example.nocap.domain.comment.entity.Comment;
 import com.example.nocap.domain.mainnews.entity.MainNews;
 import com.example.nocap.domain.news.entity.News;
 import com.example.nocap.domain.user.entity.User;
+import com.example.nocap.domain.useranalysis.entity.UserAnalysis;
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,9 +25,8 @@ public class Analysis {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long analysisId;
 
-    @ManyToOne
-    @JoinColumn(name = "UserID", nullable = false)
-    private User user;
+    @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAnalysis> userAnalyses = new ArrayList<>();
 
     private String category;
 
@@ -41,6 +42,8 @@ public class Analysis {
 
     @OneToOne(mappedBy = "analysis", cascade = CascadeType.ALL)
     private MainNews mainNews;
+
+    private String version; // 비교가 일반인지 프리미엄인지에 대한 상태
 
     public void setMainNews(MainNews mainNews) {
         this.mainNews = mainNews;

@@ -5,7 +5,9 @@ import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.domain.bookmark.entity.Bookmark;
 import com.example.nocap.domain.comment.entity.Comment;
 import com.example.nocap.domain.history.entity.History;
+import com.example.nocap.domain.useranalysis.entity.UserAnalysis;
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +29,9 @@ public class User {
     private String userPw;
     private String username;
     private String role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAnalysis> userAnalyses = new ArrayList<>();
 
     public static User from (SignupDto dto){
         return User.builder()
