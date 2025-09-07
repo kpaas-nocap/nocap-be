@@ -8,6 +8,7 @@ import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.domain.analysis.repository.AnalysisRepository;
 import com.example.nocap.domain.user.entity.User;
 import com.example.nocap.domain.user.repository.UserRepository;
+import com.example.nocap.domain.useranalysis.entity.UserAnalysis;
 import com.example.nocap.exception.CustomException;
 import com.example.nocap.exception.ErrorCode;
 import java.util.List;
@@ -51,9 +52,11 @@ public class AnalysisService {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        List<Analysis> analyses = analysisRepository.findAllByUserId(user.getId());
-        return analyses.stream()
-            .map(analysisMapper::toAnalysisDto)
+        System.out.println("유저명 : " + user.getUsername());
+
+        return user.getUserAnalyses().stream()
+            .map(UserAnalysis::getAnalysis)      // 각 UserAnalysis 객체에서 Analysis 엔티티를 추출
+            .map(analysisMapper::toAnalysisDto)  // 각 Analysis 엔티티를 AnalysisDto로 변환
             .collect(Collectors.toList());
     }
 
