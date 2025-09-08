@@ -72,8 +72,8 @@ public class AnalysisProcessService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        //String plan = user.getRole(); // NORMAL || PREMIUM
-        String plan = "PREMIUM";
+        String plan = user.getRole(); // NORMAL || PREMIUM
+        //String plan = "PREMIUM";
 
         // 1. URL에서 메인 기사 추출
         MainNews mainNews = articleExtractionService.extract(url);
@@ -103,13 +103,13 @@ public class AnalysisProcessService {
         }
 
         // 2. OpenAI로 새 제목/카테고리 생성
-        //TitleCategoryDto titleCategoryDto = openAIService.generate(mainNews.getContent());
+        TitleCategoryDto titleCategoryDto = openAIService.generate(mainNews.getContent());
 
         //가짜 타이틀
-        TitleCategoryDto titleCategoryDto = TitleCategoryDto.builder()
-                .title("‘이태원 참사 트라우마’ 실종 소방대원 숨진 채 발견")
-                    .category("기타")
-                        .build();
+//        TitleCategoryDto titleCategoryDto = TitleCategoryDto.builder()
+//                .title("‘이태원 참사 트라우마’ 실종 소방대원 숨진 채 발견")
+//                    .category("기타")
+//                        .build();
 //        TitleCategoryDto titleCategoryDto = TitleCategoryDto.builder()
 //                .title("21대 대선 정치 댓글 60% 이상 감소…네이버 \"악플 근절 정책 영향\"")
 //                    .category("정치")
