@@ -1,5 +1,6 @@
 package com.example.nocap.domain.analysis.controller;
 
+import com.example.nocap.auth.dto.response.UserDetail;
 import com.example.nocap.domain.analysis.dto.AnalysisDto;
 import com.example.nocap.domain.analysis.dto.AnalysisRequestDto;
 import com.example.nocap.domain.analysis.dto.AnalysisViewDto;
@@ -10,6 +11,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,13 +67,13 @@ public class AnalysisController {
         return ResponseEntity.ok(analysisService.getAnalysisByCategory(category));
     }
 
-    @GetMapping("/my/{id}")
+    @GetMapping("/my")
     public ResponseEntity<List<AnalysisDto>> getAnalysisByUserId(
-        //@AuthenticationPrincipal CustomUserDetails customUserDetails)
-        @PathVariable Long id)
+        @AuthenticationPrincipal UserDetail userDetail)
+        //@PathVariable Long id)
         {
-        //return ResponseEntity.ok(analysisService.getAnalysisByUserId(customUserDetails));
-        return ResponseEntity.ok(analysisService.getAnalysisByUserId(id));
+        return ResponseEntity.ok(analysisService.getAnalysisByUserId(userDetail));
+        //return ResponseEntity.ok(analysisService.getAnalysisByUserId(id));
     }
 
     @DeleteMapping("/{id}")

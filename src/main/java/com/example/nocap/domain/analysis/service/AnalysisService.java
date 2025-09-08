@@ -1,5 +1,6 @@
 package com.example.nocap.domain.analysis.service;
 
+import com.example.nocap.auth.dto.response.UserDetail;
 import com.example.nocap.domain.analysis.dto.AnalysisViewDto;
 import com.example.nocap.domain.analysis.mapper.AnalysisMapper;
 import com.example.nocap.domain.analysis.dto.AnalysisDto;
@@ -43,12 +44,9 @@ public class AnalysisService {
             .collect(Collectors.toList());
     }
 
-    public List<AnalysisDto> getAnalysisByUserId(Long id) {
+    public List<AnalysisDto> getAnalysisByUserId(UserDetail userDetail) {
 
-//        String userId = customUserDetails.getId();
-//        System.out.println("customUserDetails에서 가져온 id : " + userId);
-
-        User user = userRepository.findById(id)
+        User user = userRepository.findById(userDetail.getId())
             .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         return user.getUserAnalyses().stream()
