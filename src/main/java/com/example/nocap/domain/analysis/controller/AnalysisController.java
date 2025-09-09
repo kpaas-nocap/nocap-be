@@ -70,10 +70,8 @@ public class AnalysisController {
     @GetMapping("/my")
     public ResponseEntity<List<AnalysisDto>> getAnalysisByUserId(
         @AuthenticationPrincipal UserDetail userDetail)
-        //@PathVariable Long id)
         {
         return ResponseEntity.ok(analysisService.getAnalysisByUserId(userDetail));
-        //return ResponseEntity.ok(analysisService.getAnalysisByUserId(id));
     }
 
     @DeleteMapping("/{id}")
@@ -81,5 +79,4 @@ public class AnalysisController {
         analysisService.deleteAnalysisById(id);
         return ResponseEntity.noContent().build();
     }
-
 }
