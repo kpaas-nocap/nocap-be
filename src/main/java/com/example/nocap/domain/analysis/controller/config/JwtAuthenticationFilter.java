@@ -1,4 +1,4 @@
-package com.example.nocap.auth.config;
+package com.example.nocap.domain.analysis.controller.config;
 
 
 import com.example.nocap.auth.dto.response.UserDetail;

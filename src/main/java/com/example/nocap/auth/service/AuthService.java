@@ -6,7 +6,7 @@ import com.example.nocap.auth.kakao.KakaoUserInfoResponseDto;
 import com.example.nocap.auth.kakao.KakaoUtil;
 import com.example.nocap.auth.dto.request.SignupRequest;
 import com.example.nocap.auth.dto.response.UserResponse;
-import com.example.nocap.auth.config.JwtUtil;
+import com.example.nocap.domain.analysis.controller.config.JwtUtil;
 import com.example.nocap.domain.user.entity.User;
 import com.example.nocap.domain.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
