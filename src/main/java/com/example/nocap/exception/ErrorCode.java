@@ -27,13 +27,8 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부에 알 수 없는 오류가 발생했습니다."),
     EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "외부 API 호출 중 오류가 발생했습니다."),
     LAMBDA_REQUEST_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "람다 호출 중 오류가 발생했습니다."),
-    OPENAI_CREDIT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI의 크레딧이 부족하여 오류가 발생했습니다."),
+    OPENAI_CREDIT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI의 크레딧이 부족하여 오류가 발생했습니다.");
 
-    // 람다 테스트용
-    LAMBDA_EXECUTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "람다 실행 자체에서 오류가 발생했습니다."),
-    JSON_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "DTO <-> JSON 변환에서 오류가 발생했습니다."),
-    LAMBDA_INVOCATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "람다에서 반환 오류가 발생했습니다."),
-    AWS_SDK_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AWS SDK 클라이언트 레벨의 오류가 발생했습니다.");
 
 
     private final HttpStatus status;       // HTTP 상태 코드

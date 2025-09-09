@@ -23,7 +23,7 @@ public class SbertResponseDto {
     @AllArgsConstructor
     public static class NewsComparisonDto {
         private NewsWithSimilarityDto newsWithSimilarityDto;
-        private String comparison; // Premium 플랜에서 제공하는 GPT-4 비교 요약문
+        private String comparison;
     }
     @Data
     @NoArgsConstructor
