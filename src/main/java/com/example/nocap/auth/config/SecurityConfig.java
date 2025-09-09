@@ -1,4 +1,4 @@
-package com.example.nocap.domain.analysis.controller.config;
+package com.example.nocap.auth.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

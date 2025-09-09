@@ -1,4 +1,4 @@
-package com.example.nocap.domain.analysis.controller.config;
+package com.example.nocap.auth.config;
 
 import com.example.nocap.domain.user.entity.User;
 import io.jsonwebtoken.Jwts;
