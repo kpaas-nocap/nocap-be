@@ -62,6 +62,9 @@ dependencies {
     // Fast API - WebClient
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // Selenium
+    implementation 'org.seleniumhq.selenium:selenium-java:4.21.0'
+
 }
 
 dependencyManagement {
