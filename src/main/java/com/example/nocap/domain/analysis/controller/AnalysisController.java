@@ -68,12 +68,9 @@ public class AnalysisController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<AnalysisDto>> getAnalysisByUserId(
-        @AuthenticationPrincipal UserDetail userDetail)
-        //@PathVariable Long id)
-        {
+    public ResponseEntity<List<AnalysisDto>> getAnalysisByUserId(@AuthenticationPrincipal UserDetail userDetail) {
+        System.out.println("유저명: " + userDetail.getUsername());
         return ResponseEntity.ok(analysisService.getAnalysisByUserId(userDetail));
-        //return ResponseEntity.ok(analysisService.getAnalysisByUserId(id));
     }
 
     @DeleteMapping("/{id}")
