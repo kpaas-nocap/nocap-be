@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -31,7 +32,13 @@ public class SecurityConfig {
             "/auth/form/**",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/swagger-resources/**"
+            "/swagger-resources/**",
+            "/api/nocap/analysis/healthCheck",
+            "/api/nocap/analysis",
+            "/api/nocap/analysis/{id:\\d+}",
+            "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
+            "/api/nocap/analysis/keyword/{keyword}",
+            "/api/nocap/search/**"
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Bean
