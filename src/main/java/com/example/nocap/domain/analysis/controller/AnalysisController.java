@@ -68,8 +68,7 @@ public class AnalysisController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<AnalysisDto>> getAnalysisByUserId(@AuthenticationPrincipal UserDetail userDetail) {
-        System.out.println("유저명: " + userDetail.getUsername());
+    public ResponseEntity<List<AnalysisDto>> getAnalysisByUserId(@AuthenticationPrincipal UserDetail userDetail) { 
         return ResponseEntity.ok(analysisService.getAnalysisByUserId(userDetail));
     }
 
@@ -78,5 +77,4 @@ public class AnalysisController {
         analysisService.deleteAnalysisById(id);
         return ResponseEntity.noContent().build();
     }
-
 }

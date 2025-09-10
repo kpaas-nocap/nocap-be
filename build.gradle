@@ -65,6 +65,9 @@ dependencies {
     // json parsing
     implementation 'org.json:json:20240303'
 
+    // Selenium
+    implementation 'org.seleniumhq.selenium:selenium-java:4.21.0'
+
 }
 
 dependencyManagement {

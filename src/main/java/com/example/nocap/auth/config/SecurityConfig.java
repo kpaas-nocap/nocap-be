@@ -19,7 +19,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -39,6 +38,8 @@ public class SecurityConfig {
             "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
             "/api/nocap/analysis/keyword/{keyword}",
             "/api/nocap/search/**"
+            "/api/nocap/popnews"
+
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Bean
