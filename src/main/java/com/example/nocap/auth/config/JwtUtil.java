@@ -45,6 +45,11 @@ public class JwtUtil {
                 .parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
+    public Date getExpiration(String token) {
+        return Jwts.parser().verifyWith(secretKey).build()
+                .parseSignedClaims(token).getPayload().getExpiration();
+    }
+
     public Long getId(String token) {
         return Jwts.parser().verifyWith(secretKey).build()
                 .parseSignedClaims(token).getPayload().get("id", Long.class);

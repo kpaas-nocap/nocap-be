@@ -2,6 +2,7 @@ package com.example.nocap.auth.config;
 
 
 import com.example.nocap.auth.dto.response.UserDetail;
+import com.example.nocap.auth.service.TokenBlacklist;
 import com.example.nocap.domain.user.entity.User;
 import com.example.nocap.domain.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -28,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final TokenBlacklist tokenBlacklist;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -39,13 +41,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String authorization = request.getHeader("Authorization");
-
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = authorization.substring(7);
+
+        if (tokenBlacklist.isBlacklisted(token)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
             if (jwtUtil.isExpired(token)) {

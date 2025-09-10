@@ -62,6 +62,8 @@ dependencies {
     // Fast API - WebClient
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // blacklist cache library
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
 }
 
 dependencyManagement {
