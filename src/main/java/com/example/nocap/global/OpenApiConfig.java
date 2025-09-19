@@ -17,7 +17,5 @@ public class OpenApiConfig {
                                 .scheme("bearer")
                                 .bearerFormat("JWT"));
         return new OpenAPI().components(comps);
-
-        //test test test
     }
 }
