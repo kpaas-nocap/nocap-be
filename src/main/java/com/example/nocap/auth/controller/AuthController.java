@@ -1,7 +1,7 @@
 package com.example.nocap.auth.controller;
 
 
-import com.example.nocap.auth.dto.FormLoginRequest;
+import com.example.nocap.auth.dto.request.FormLoginRequest;
 import com.example.nocap.auth.dto.request.FormSignupRequest;
 import com.example.nocap.auth.dto.request.SignupRequest;
 import com.example.nocap.auth.service.AuthService;

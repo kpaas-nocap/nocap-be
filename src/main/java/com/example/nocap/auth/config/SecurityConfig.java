@@ -25,6 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     public static final String[] ALLOWED_URLS = {
+
             "/auth/kakao/**",
             "/auth/login/kakao",
             "/auth/form/**",
@@ -36,6 +37,10 @@ public class SecurityConfig {
             "/api/nocap/analysis/{id}",        // 특정 분석 상세 조회 (GET)
             "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
             "/api/nocap/popnews"
+            "/swagger-ui.html",
+            "/webjars/**"
+
+
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Bean
@@ -53,7 +58,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("*"));
+        config.setAllowedOriginPatterns(List.of(
+                "http://13.209.98.128",
+                "http://13.209.98.128:8080",
+                "http://localhost:3000",
+                "http://localhost:8080"
+                ));
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
