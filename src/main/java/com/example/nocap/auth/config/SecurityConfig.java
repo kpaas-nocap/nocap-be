@@ -18,7 +18,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -31,7 +30,12 @@ public class SecurityConfig {
             "/auth/form/**",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/swagger-resources/**"
+            "/swagger-resources/**",
+            "/api/nocap/analysis/healthCheck", // 헬스 체크
+            "/api/nocap/analysis",             // 전체 분석 목록 조회 (GET), 새 분석 요청 (POST)
+            "/api/nocap/analysis/{id}",        // 특정 분석 상세 조회 (GET)
+            "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
+            "/api/nocap/popnews"
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Bean
