@@ -57,4 +57,9 @@ public class AuthController implements AuthSwagger{
     public ResponseEntity<?> formLogin(@RequestBody FormLoginRequest req, HttpServletResponse httpServletResponse) {
         return ResponseEntity.ok(authService.formLogin(req, httpServletResponse));
     }
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization) {
+        authService.logout(authorization);
+        return ResponseEntity.noContent().build();
+    }
 }
