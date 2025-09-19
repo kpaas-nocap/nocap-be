@@ -119,4 +119,12 @@ public interface AuthSwagger {
             }
     )
     ResponseEntity<?> formLogin(FormLoginRequest req, HttpServletResponse httpServletResponse);
+    @Operation(
+            summary = "로그아웃",
+            description = "현재 토큰을 블랙리스트로 설정. 블랙리스트에서 60분 이후 삭제. 레디스가 아닌 메모리 형식으로 구현되어 있음",
+            parameters = { @Parameter(name = "Authorization", description = "Bearer {Access Token}", required = true) },
+            responses = { @ApiResponse(responseCode = "204", description = "로그아웃 완료") }
+    )
+    ResponseEntity<Void> logout(String authorization);
+
 }

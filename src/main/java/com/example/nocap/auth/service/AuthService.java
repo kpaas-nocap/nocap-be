@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final TokenBlacklist tokenBlacklist;
 
     public UserResponse oAuthLogin(String accessCode, HttpServletResponse httpServletResponse) {
         String accessToken = kakaoUtil.getAccessTokenFromKakao(accessCode);
@@ -91,5 +93,10 @@ public class AuthService {
         String token = jwtUtil.createJwt(user, 60 * 60 * 1000L);
         httpServletResponse.setHeader("Authorization", "Bearer " + token);
         return new UserResponse(user, true);
+    }
+    public void logout(String authorization) {
+        String token = authorization.startsWith("Bearer ") ? authorization.substring(7) : authorization;
+        Date exp = jwtUtil.getExpiration(token);
+        tokenBlacklist.blacklist(token, exp.getTime());
     }
 }

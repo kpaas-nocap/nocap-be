@@ -7,23 +7,26 @@ import com.example.nocap.domain.analysis.dto.NewsSearchResponseDto;
 import com.example.nocap.domain.analysis.dto.SbertRequestDto;
 import com.example.nocap.domain.analysis.dto.SbertResponseDto;
 import com.example.nocap.domain.analysis.dto.TitleCategoryDto;
+import com.example.nocap.domain.analysis.entity.Analysis;
+import com.example.nocap.domain.analysis.mapper.AnalysisMapper;
+import com.example.nocap.domain.analysis.repository.AnalysisRepository;
 import com.example.nocap.domain.mainnews.entity.MainNews;
 import com.example.nocap.domain.mainnews.mapper.MainNewsMapper;
+import com.example.nocap.domain.mainnews.repository.MainNewsRepository;
+import com.example.nocap.domain.news.mapper.NewsMapper;
+import com.example.nocap.domain.user.entity.User;
+import com.example.nocap.domain.user.repository.UserRepository;
 import com.example.nocap.exception.CustomException;
 import com.example.nocap.exception.ErrorCode;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.services.lambda.LambdaClient;
-import software.amazon.awssdk.services.lambda.model.InvokeRequest;
-import software.amazon.awssdk.services.lambda.model.InvokeResponse;
-import software.amazon.awssdk.services.lambda.model.LambdaException;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -34,31 +37,75 @@ public class AnalysisProcessService {
     private final SearchService searchService;
     private final CrawlingService crawlingService;
     private final AnalysisSaveService analysisSaveService;
+    private final NewsMapper newsMapper;
     private final MainNewsMapper mainNewsMapper;
+    private final AnalysisMapper analysisMapper;
+    private final MainNewsRepository mainNewsRepository;
+    private final UserRepository userRepository;
 
-    // 람다 호출용 추가 의존성
-    private final LambdaClient lambdaClient;
-    private final ObjectMapper objectMapper;
+    // Fast API 서버 호출용 추가 의존성
+    private  final WebClient webClient;
 
     private static final Logger log = LoggerFactory.getLogger(AnalysisProcessService.class);
 
-    @Value("${aws.lambda.function-name}")
-    private String lambdaFunctionName;
+    public boolean healthCheck() {
+        try {
+            return Boolean.TRUE.equals(webClient.get()               // 1. GET 요청을 보냄
+                .uri("/health")              // 2. FastAPI 서버의 /health 엔드포인트로
+                .retrieve()                  // 3. 응답을 받음 (오류 코드는 여기서 예외 발생)
+                .toBodilessEntity()          // 4. 응답 본문(body)은 필요 없으므로 무시
+                .flatMap(response -> Mono.just(
+                    response.getStatusCode().is2xxSuccessful())) // 5. 상태 코드가 2xx(성공)이면 true로 변환
+                .onErrorReturn(false)        // 6. 3번 단계 등에서 오류 발생 시 false를 반환
+                .block());                    // 7. 비동기 작업이 끝날 때까지 기다리고 최종 boolean 값 반환
+        } catch (Exception e) {
+            // .block() 에서 타임아웃 등의 예외가 발생할 경우를 대비한 최종 안전장치
+            return false;
+        }
+    }
 
     public SbertResponseDto analyzeUrlAndPrepareRequest(AnalysisRequestDto analysisRequestDto) {
 
         String url = analysisRequestDto.getUrl();
-        String plan = analysisRequestDto.getPlan();
         Long userId = analysisRequestDto.getUserId();
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        String plan = user.getRole(); // NORMAL || PREMIUM
+        //String plan = "PREMIUM";
 
         // 1. URL에서 메인 기사 추출
         MainNews mainNews = articleExtractionService.extract(url);
         System.out.println("추출된 기사 제목 : " + mainNews.getTitle());
 
+        Optional<MainNews> existingMainNewsOpt = mainNewsRepository.findByCanonicalUrl(mainNews.getCanonicalUrl());
+
+        if (existingMainNewsOpt.isPresent()) {
+            // 뉴스가 이미 분석된 경우
+            Analysis existingAnalysis = existingMainNewsOpt.get().getAnalysis();
+            // 유저는 프리미엄인데 분석하려는 뉴스의 비젼이 일반인 경우
+            if ("PREMIUM".equalsIgnoreCase(plan) && "NORMAL".equalsIgnoreCase(existingAnalysis.getVersion())) {
+                SbertRequestDto sbertRequestDto = SbertRequestDto.builder()
+                    .plan(plan)
+                    .category(existingAnalysis.getCategory())
+                    .mainNewsDto(mainNewsMapper.toMainNewsDto(mainNews))
+                    .newsDtos(newsMapper.toNewsDtoList(existingAnalysis.getRelatedNews()))
+                    .build();
+                SbertResponseDto sbertResponseDto = requestFastAPi(sbertRequestDto);
+                // 비교를 갱신하여 다시 저장
+                analysisSaveService.updateAnalysisData(existingAnalysis, sbertResponseDto);
+
+            }
+            // 이미 있는 분석을 반환
+            return analysisMapper.toSbertResponseDto(existingAnalysis);
+
+        }
+
         // 2. OpenAI로 새 제목/카테고리 생성
         TitleCategoryDto titleCategoryDto = openAIService.generate(mainNews.getContent());
 
-//        //가짜 타이틀
+        //가짜 타이틀
 //        TitleCategoryDto titleCategoryDto = TitleCategoryDto.builder()
 //                .title("‘이태원 참사 트라우마’ 실종 소방대원 숨진 채 발견")
 //                    .category("기타")
@@ -91,67 +138,26 @@ public class AnalysisProcessService {
             .newsDtos(crawledResponseDto.getNewsDtos())
             .build();
 
-        // 람다에 보낼 요청 DTO 로깅
-//        try {
-//            String jsonRequestForLogging = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sbertRequestDto);
-//
-//            // info 레벨로 로그 출력
-//            log.info("--- Sending Payload to Lambda ---\n{}", jsonRequestForLogging);
-//
-//        } catch (JsonProcessingException e) {
-//            // 로깅 중 오류가 발생하더라도 전체 프로세스가 멈추지 않도록 예외 처리
-//            log.error("Failed to serialize SbertRequestDto to JSON for logging", e);
-//        }
+        // 6. FastAPI 호출
+        SbertResponseDto sbertResponseDto = requestFastAPi(sbertRequestDto);
+        assert sbertResponseDto != null;
+        analysisSaveService.saveAnalysisData(analysisRequestDto.getUserId(), mainNews,
+            sbertResponseDto);
+        return sbertResponseDto;
+    }
 
-        // 6. 람다 호출
+    private SbertResponseDto requestFastAPi(SbertRequestDto sbertRequestDto) {
         SbertResponseDto sbertResponseDto;
         try {
-            // DTO 객체를 JSON 문자열로 변환하고, 다시 Byte 형태로 변환
-            String requestPayload = objectMapper.writeValueAsString(sbertRequestDto);
-            SdkBytes payload = SdkBytes.fromUtf8String(requestPayload);
-
-            // 람다를 호출하기 위한 요청 객체 생성
-            InvokeRequest request = InvokeRequest.builder()
-                .functionName(lambdaFunctionName)
-                .payload(payload)
-                .build();
-
-            // 람다 함수를 동기적으로 호출
-            InvokeResponse response = lambdaClient.invoke(request);
-
-            // 람다 함수 내부에서 오류가 발생했는지 확인
-            if (response.functionError() != null) {
-                throw new CustomException(ErrorCode.LAMBDA_REQUEST_ERROR); // 새로운 에러 코드 정의 필요
-            }
-
-            // 람다의 응답(Byte)을 DTO 객체로 변환하여 반환
-            // 1. 람다의 전체 응답(바깥쪽 JSON)을 문자열로 받음
-            String outerPayload = response.payload().asUtf8String();
-
-            // 2. 바깥쪽 JSON을 JsonNode 트리 구조로 변환
-            JsonNode rootNode = objectMapper.readTree(outerPayload);
-
-            // 3. 'body' 키를 찾아 그 안에 있는 값을 "문자열"로 추출
-            String innerPayload = rootNode.get("body").asText();
-
-            // 4. 추출한 "내부 JSON 문자열"을 우리가 원하는 최종 DTO로 변환
-            sbertResponseDto = objectMapper.readValue(innerPayload, SbertResponseDto.class);
-
-            log.info("Deserialization successful. Category: {}", sbertResponseDto.getCategory());
-
-
-        } catch (JsonProcessingException e) {
-            log.error("JSON processing failed: {}", e.getMessage());
-            throw new CustomException(ErrorCode.JSON_PROCESSING_ERROR);
-        } catch (LambdaException e) {
-            log.error("AWS Lambda service error: {}", e.awsErrorDetails().errorMessage());
-            throw new CustomException(ErrorCode.LAMBDA_INVOCATION_ERROR);
+            return sbertResponseDto = webClient.post() // POST 요청
+                .uri("/analyze") //FastAPI 서버의 엔드포인트 경로
+                .bodyValue(sbertRequestDto)
+                .retrieve()
+                .bodyToMono(SbertResponseDto.class)
+                .block(); // 비동기 처리를 동기적으로 기다림
         } catch (Exception e) {
-            log.error("An unexpected error occurred during Lambda invocation", e);
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+            log.error("FastAPI server call failed: {}", e.getMessage());
+            throw new CustomException(ErrorCode.EXTERNAL_API_ERROR);
         }
-
-        analysisSaveService.saveAnalysisData(analysisRequestDto.getUserId(), mainNews, sbertResponseDto);
-        return sbertResponseDto;
     }
 }
