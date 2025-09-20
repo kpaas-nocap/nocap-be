@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows: ["NOCAP-BE CI"]
     types: [ completed ]
+
 jobs:
   deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -32,37 +33,50 @@ jobs:
           script: |
             set -e
 
-             mkdir -p /home/ubuntu/nocap-be/src/main/resources
-            cat << 'EOF' > /home/ubuntu/nocap-be/src/main/resources/application.yml
+            # 애플리케이션 설정 파일 갱신
+            mkdir -p /home/ubuntu/nocap-be/src/main/resources
+            cat <<'EOF' > /home/ubuntu/nocap-be/src/main/resources/application.yml
             ${{ secrets.APPLICATION_YML }}
             EOF
-            
-            # 이전 이미지 ID 저장
-            PREV_IMAGE=$(docker images \
-              --filter=reference="${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:latest" \
-              --format '{{.ID}}')
 
+            # 현재 latest 이미지를 prev 태그로 백업
+            CURR_LATEST_ID=$(docker images -q ${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:latest || true)
+            if [ -n "$CURR_LATEST_ID" ]; then
+              echo "현재 latest 이미지를 prev로 태깅합니다: $CURR_LATEST_ID"
+              docker tag ${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:latest \
+                ${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:prev
+            fi
+
+            # 새 이미지 pull
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:latest
 
+            # 기존 컨테이너 중지 및 삭제
             docker rm -f nocap-be || true
+
+            # 새 컨테이너 실행 (외부 yml 반영)
             docker run -d \
               --name nocap-be \
               -p 80:8080 \
               -v /home/ubuntu/nocap-be/src/main/resources/application.yml:/app/config/application.yml \
-              ${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:latest
+              ${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:latest \
+              --spring.config.additional-location=file:/app/config/application.yml
 
+            # 새 컨테이너 상태 확인
             sleep 10
-            RUNNING=$(docker inspect -f '{{.State.Running}}' nocap-be)
+            RUNNING=$(docker inspect -f '{{.State.Running}}' nocap-be || echo "false")
             if [ "$RUNNING" != "true" ]; then
-              echo "새 컨테이너 시작 실패, 롤백"
+              echo "🚨 새 컨테이너 실행 실패 → 롤백 시작"
               docker rm -f nocap-be || true
+
+              # prev 이미지 실행
               docker run -d \
                 --name nocap-be \
                 -p 80:8080 \
                 -v /home/ubuntu/nocap-be/src/main/resources/application.yml:/app/config/application.yml \
-                $PREV_IMAGE
+                ${{ secrets.DOCKERHUB_USERNAME }}/nocap-be:prev \
+                --spring.config.additional-location=file:/app/config/application.yml
             else
-              echo "새 컨테이너 정상 실행"
+              echo "✅ 새 컨테이너 정상 실행됨"
             fi
 
             # 사용하지 않는 이미지 정리

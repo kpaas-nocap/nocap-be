@@ -26,19 +26,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     public static final String[] ALLOWED_URLS = {
-            "/auth/kakao/**",
-            "/auth/login/kakao",
-            "/auth/form/**",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/swagger-resources/**",
-            "/api/nocap/analysis/healthCheck",
-            "/api/nocap/analysis",
+
             "/api/nocap/analysis/{id:\\d+}",
-            "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
             "/api/nocap/analysis/keyword/{keyword}",
             "/api/nocap/search/**"
-            "/api/nocap/popnews"
+            "/auth/kakao/**", "/auth/login/kakao", "/auth/form/**", "/swagger-ui/**",
+            "/v3/api-docs/**", "/swagger-resources/**",
+            "/api/nocap/analysis/healthCheck", // 헬스 체크
+            "/api/nocap/analysis",             // 전체 분석 목록 조회 (GET), 새 분석 요청 (POST)
+            "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
+            "/api/nocap/analysis/{id:\\d+}",
+            "/api/nocap/analysis/keyword/{keyword}",
+            "/api/nocap/search/**",
+            "/api/nocap/popnews", "/swagger-ui.html", "/webjars/**",
 
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -57,7 +57,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("*"));
+        config.setAllowedOriginPatterns(List.of(
+                "http://13.209.98.128",
+                "http://13.209.98.128:8080",
+                "http://localhost:3000",
+                "http://localhost:8080"
+                ));
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

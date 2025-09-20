@@ -1,7 +1,7 @@
 package com.example.nocap.auth.controller;
 
 
-import com.example.nocap.auth.dto.FormLoginRequest;
+import com.example.nocap.auth.dto.request.FormLoginRequest;
 import com.example.nocap.auth.dto.request.FormSignupRequest;
 import com.example.nocap.auth.dto.request.SignupRequest;
 import com.example.nocap.auth.service.AuthService;
@@ -56,5 +56,10 @@ public class AuthController implements AuthSwagger{
     @PostMapping("/form/login")
     public ResponseEntity<?> formLogin(@RequestBody FormLoginRequest req, HttpServletResponse httpServletResponse) {
         return ResponseEntity.ok(authService.formLogin(req, httpServletResponse));
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization) {
+        authService.logout(authorization);
+        return ResponseEntity.noContent().build();
     }
 }
