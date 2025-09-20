@@ -68,9 +68,7 @@ public class AnalysisController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<AnalysisDto>> getAnalysisByUserId(
-        @AuthenticationPrincipal UserDetail userDetail)
-        {
+    public ResponseEntity<List<AnalysisDto>> getAnalysisByUserId(@AuthenticationPrincipal UserDetail userDetail) { 
         return ResponseEntity.ok(analysisService.getAnalysisByUserId(userDetail));
     }
 
