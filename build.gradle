@@ -62,6 +62,8 @@ dependencies {
     // Fast API - WebClient
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // json parsing
+    implementation 'org.json:json:20240303'
 
     // blacklist cache library
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
@@ -77,6 +79,8 @@ dependencies {
         implementation("io.swagger.core.v3:swagger-models-jakarta:2.2.36")
         implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.36")
     }
+    //헬스체크
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 }
 
