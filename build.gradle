@@ -79,6 +79,8 @@ dependencies {
         implementation("io.swagger.core.v3:swagger-models-jakarta:2.2.36")
         implementation("io.swagger.core.v3:swagger-core-jakarta:2.2.36")
     }
+    //헬스체크
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 }
 
