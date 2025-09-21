@@ -13,9 +13,21 @@ jobs:
           java-version: 17
       - run: chmod +x gradlew
       - run: ./gradlew clean build -x test
+
+      - name: Debug registry connectivity
+        run: |
+          set -x
+          REG="${{ secrets.NCR_REGISTRY }}"
+          which dig || (sudo apt-get update && sudo apt-get install -y dnsutils)
+          echo "REG=$REG"
+          dig +short $REG || true
+          ping -c 1 $REG || true
+          curl -v --max-time 10 https://$REG/v2/ || true
+
       - name: Docker login NCR
         run: |
           echo "${{ secrets.NCR_PASSWORD }}" | docker login ${{ secrets.NCR_REGISTRY }} -u "${{ secrets.NCR_USERNAME }}" --password-stdin
+
       - name: Build and push
         run: |
           IMAGE=${{ secrets.NCR_REGISTRY }}/${{ secrets.NCR_REPOSITORY }}
