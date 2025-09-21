@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nocap-be
+  namespace: nocap
+spec:
+  type: LoadBalancer
+  selector:
+    app: nocap-be
+  ports:
+    - port: 80
+      targetPort: 8080

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nocap-be
+  namespace: nocap
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: nocap-be
+  template:
+    metadata:
+      labels:
+        app: nocap-be
+    spec:
+      imagePullSecrets:
+        - name: ncr-cred
+      containers:
+        - name: nocap-be
+          image: no-cap.kr.ncr.ntruss.com/nocap-be:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom: { secretKeyRef: { name: app-secrets, key: SPRING_DATASOURCE_URL } }
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom: { secretKeyRef: { name: app-secrets, key: SPRING_DATASOURCE_USERNAME } }
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom: { secretKeyRef: { name: app-secrets, key: SPRING_DATASOURCE_PASSWORD } }
+            - name: JWT_SECRET
+              valueFrom: { secretKeyRef: { name: app-secrets, key: JWT_SECRET } }
+            - name: KAKAO_CLIENT
+              valueFrom: { secretKeyRef: { name: app-secrets, key: KAKAO_CLIENT } }
+            - name: KAKAO_SECRET
+              valueFrom: { secretKeyRef: { name: app-secrets, key: KAKAO_SECRET } }
+            - name: OPENAI_API_KEY
+              valueFrom: { secretKeyRef: { name: app-secrets, key: OPENAI_API_KEY } }
+            - name: MAIL_USERNAME
+              valueFrom: { secretKeyRef: { name: app-secrets, key: MAIL_USERNAME } }
+            - name: MAIL_PASSWORD
+              valueFrom: { secretKeyRef: { name: app-secrets, key: MAIL_PASSWORD } }
+            - name: FASTAPI_SERVER_URL
+              valueFrom: { secretKeyRef: { name: app-secrets, key: FASTAPI_SERVER_URL } }
+          args: ["--spring.config.additional-location=file:/app/config/application.yml"]
+          volumeMounts:
+            - name: app-config
+              mountPath: /app/config
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: app-config
+          configMap:
+            name: app-config
