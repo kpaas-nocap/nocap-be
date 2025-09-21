@@ -49,7 +49,7 @@ spec:
               valueFrom: { secretKeyRef: { name: app-secrets, key: FASTAPI_SERVER_URL } }
           args: ["--spring.config.additional-location=file:/app/config/application.yml"]
           volumeMounts:
-            - name: app-config
+            - name: nocap-config
               mountPath: /app/config
               readOnly: true
           readinessProbe:
@@ -66,6 +66,6 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
       volumes:
-        - name: app-config
+        - name: nocap-config
           configMap:
-            name: app-config
+            name: nocap-config
