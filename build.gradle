@@ -79,7 +79,6 @@ dependencies {
     }
     //헬스체크
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
 }
 
 configurations.all {
