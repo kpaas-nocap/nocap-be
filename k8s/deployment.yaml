@@ -47,6 +47,10 @@ spec:
               valueFrom: { secretKeyRef: { name: app-secrets, key: MAIL_PASSWORD } }
             - name: FASTAPI_SERVER_URL
               valueFrom: { secretKeyRef: { name: app-secrets, key: FASTAPI_SERVER_URL } }
+            - name: NAVER_CLIENT_ID
+              valueFrom: { secretKeyRef: { name: app-secrets, key: NAVER_CLIENT_ID } }
+            - name: NAVER_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: app-secrets, key: NAVER_CLIENT_SECRET } }
           args: ["--spring.config.additional-location=file:/app/config/application.yml"]
           volumeMounts:
             - name: nocap-config
