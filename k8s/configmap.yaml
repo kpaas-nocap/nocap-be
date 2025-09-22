@@ -42,6 +42,10 @@ data:
     fastapi:
       server:
         url: ${FASTAPI_SERVER_URL}
+    cloud:
+      aws:
+        region:
+          static: ap-northeast-2
     management:
       endpoint:
         health:
