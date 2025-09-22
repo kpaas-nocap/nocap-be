@@ -39,6 +39,7 @@ public class SecurityConfig {
             "/api/nocap/analysis/keyword/{keyword}",
             "/api/nocap/search/**",
             "/api/nocap/popnews", "/swagger-ui.html", "/webjars/**",
+            "/actuator/health", "/actuator/health/**"
 
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
