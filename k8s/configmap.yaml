@@ -36,9 +36,8 @@ data:
         openai:
           api-key: ${OPENAI_API_KEY}
     naver:
-      client:
-        id: ${NAVER_CLIENT_ID}
-        secret: ${NAVER_CLIENT_SECRET}
+      client-id: ${NAVER_CLIENT_ID}
+      client-secret: ${NAVER_CLIENT_SECRET}
     fastapi:
       server:
         url: ${FASTAPI_SERVER_URL}
