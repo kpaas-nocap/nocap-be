@@ -48,7 +48,7 @@ jobs:
             --from-literal=OPENAI_API_KEY="$OPENAI_API_KEY" \
             --from-literal=MAIL_USERNAME="$MAIL_USERNAME" \
             --from-literal=MAIL_PASSWORD="$MAIL_PASSWORD" \
-            --from-literal=FASTAPI_SERVER_URL="$FASTAPI_SERVER_URL"
+            --from-literal=FASTAPI_SERVER_URL="$FASTAPI_SERVER_URL" \
           --from-literal=NAVER_CLIENT_ID="$NAVER_CLIENT_ID" \     
           --from-literal=NAVER_CLIENT_SECRET="$NAVER_CLIENT_SECRET"
       - name: Apply manifests
