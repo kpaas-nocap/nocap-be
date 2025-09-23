@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nocap-be-ing
+  namespace: nocap
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: www.nocap.kr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nocap-be
+                port:
+                  number: 80
