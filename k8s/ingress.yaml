@@ -3,8 +3,14 @@ kind: Ingress
 metadata:
   name: nocap-be-ing
   namespace: nocap
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+       - www.nocap.kr
+      secretName: nocap-be-tls
   rules:
     - host: www.nocap.kr
       http:
