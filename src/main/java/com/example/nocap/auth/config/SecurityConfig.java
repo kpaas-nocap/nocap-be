@@ -59,8 +59,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of(
-                "http://13.209.98.128",
-                "http://13.209.98.128:8080",
+                "https://nocap-omega.vercel.app",
+                "https://www.nocap.kr",
+                "https://nocap.kr",
                 "http://localhost:3000",
                 "http://localhost:8080"
                 ));
