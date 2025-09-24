@@ -30,7 +30,7 @@ data:
         auth:
           client: ${KAKAO_CLIENT}
           client-secret: ${KAKAO_SECRET}
-          redirect: https://nocap-omega.vercel.app/
+          redirect: https://nocap-omega.vercel.app/login
       
       ai:
         openai:
