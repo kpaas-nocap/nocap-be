@@ -8,6 +8,7 @@ import com.example.nocap.domain.analysis.dto.SbertResponseDto;
 import com.example.nocap.domain.analysis.service.AnalysisProcessService;
 import com.example.nocap.domain.analysis.service.AnalysisService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,8 @@ public class AnalysisController {
     @Operation(
         summary = "Analysis 수행",
         description = "사용자의 id와 분석할 기사의 url을 통해 분석을 수행.",
+        parameters = { @Parameter(name = "userId", description = "사용자 ID", required = true, example = "1"),
+                       @Parameter(name = "url", description = "분석할 뉴스 URL", required = true, example = "https://n.news.naver.com/article/366/0001111339?cds=news_media_pc")},
         responses = { /* ... */ }
     )
     @PostMapping
@@ -77,6 +80,7 @@ public class AnalysisController {
     @Operation(
         summary = "특정 분석 조회",
         description = "분석 id를 통해 특정 분석 하나를 조회.",
+        parameters = { @Parameter(name = "id", description = "분석 ID", required = true, example = "1"),},
         responses = { /* ... */ }
     )
     @GetMapping("/{id}")
@@ -87,6 +91,7 @@ public class AnalysisController {
     @Operation(
         summary = "카테고리별 분석 조회",
         description = "요청된 카테고리에 맞는 분석을 조회.",
+        parameters = { @Parameter(name = "category", description = "분석 카테고리", required = true, example = "사회"),},
         responses = { /* ... */ }
     )
     @GetMapping("category/{category}")
@@ -107,6 +112,7 @@ public class AnalysisController {
     @Operation(
         summary = "특정 분석 삭제",
         description = "분석 id를 통해 특정 분석을 삭제.",
+        parameters = { @Parameter(name = "id", description = "분석 ID", required = true, example = "1"),},
         responses = { /* ... */ }
     )
     @DeleteMapping("/{id}")

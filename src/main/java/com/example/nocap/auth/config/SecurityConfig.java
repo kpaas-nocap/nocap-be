@@ -28,6 +28,7 @@ public class SecurityConfig {
             "/api/nocap/analysis/{id:\\d+}",
             "/api/nocap/analysis/keyword/{keyword}",
             "/api/nocap/search/**",
+            "/api/nocap/search/**/**",
             "/auth/kakao/**", "/auth/login/kakao", "/auth/form/**", "/swagger-ui/**",
             "/v3/api-docs/**", "/swagger-resources/**",
             "/api/nocap/analysis/healthCheck", // 헬스 체크

@@ -3,6 +3,7 @@ package com.example.nocap.domain.popnews.controller;
 import com.example.nocap.domain.popnews.dto.PopNewsDto;
 import com.example.nocap.domain.popnews.service.PopNewsService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
