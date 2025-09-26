@@ -69,7 +69,7 @@ public class JwtUtil {
 
     public String createPreRegisterToken(String email, Long expiredMs) {
         return Jwts.builder()
-                .claim("username", email)
+                .claim("userId", email)
                 .claim("isTmp", true)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))

@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nocap-config
+  namespace: nocap
+data:
+  application.yml: |
+    spring:
+      application:
+        name: nocap
+      datasource:
+        url: ${SPRING_DATASOURCE_URL}
+        username: ${SPRING_DATASOURCE_USERNAME}
+        password: ${SPRING_DATASOURCE_PASSWORD}
+        driver-class-name: com.mysql.cj.jdbc.Driver
+      jpa:
+        database: mysql
+        database-platform: org.hibernate.dialect.MySQLDialect
+        hibernate:
+          ddl-auto: update
+        show-sql: true
+        properties:
+          hibernate:
+            format_sql: false
+            use_sql_comments: true
+      jwt:
+        secret: ${JWT_SECRET}
+        access-token-expiration-ms: 6000000
+      kakao:
+        auth:
+          client: ${KAKAO_CLIENT}
+          client-secret: ${KAKAO_SECRET}
+          redirect: https://nocap-omega.vercel.app/login
+      
+      ai:
+        openai:
+          api-key: ${OPENAI_API_KEY}
+    naver:
+      client-id: ${NAVER_CLIENT_ID}
+      client-secret: ${NAVER_CLIENT_SECRET}
+    fastapi:
+      server:
+        url: ${FASTAPI_SERVER_URL}
+    cloud:
+      aws:
+        region:
+          static: ap-northeast-2
+    management:
+      endpoint:
+        health:
+          probes:
+            enabled: true
+      endpoints:
+        web:
+          exposure:
+            include: health,info
