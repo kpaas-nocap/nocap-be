@@ -3,7 +3,8 @@ package com.example.nocap.domain.news.mapper;
 import com.example.nocap.domain.analysis.dto.SbertResponseDto;
 import com.example.nocap.domain.analysis.dto.SbertResponseDto.NewsComparisonDto;
 import com.example.nocap.domain.analysis.dto.SbertResponseDto.NewsWithSimilarityDto;
-import com.example.nocap.domain.news.dto.NewsDto;
+import com.example.nocap.domain.news.dto.NewsRequestDto;
+import com.example.nocap.domain.news.dto.NewsResponseDto;
 import com.example.nocap.domain.news.entity.News;
 import java.util.List;
 import org.mapstruct.Mapper;
@@ -22,9 +23,10 @@ public interface NewsMapper {
     @Mapping(source = "similarity", target = "similarity") // 4. similarity 필드는 이름이 같으니 그대로 매핑
     NewsWithSimilarityDto toNewsWithSimilarityDto(News news);
 
-    NewsDto toNewsDto(News news);
+    NewsRequestDto toNewsRequestDto(News news);
+    NewsResponseDto toNewsResponseDto(News news);
 
-    List<NewsDto> toNewsDtoList(List<News> newsList);
+    List<NewsRequestDto> toNewsRequestDtoList(List<News> newsList);
 
 
     @Named("Sbert")
@@ -32,4 +34,19 @@ public interface NewsMapper {
     @Mapping(source = ".", target = "newsWithSimilarityDto.newsDto")
     @Mapping(source = "comparison", target = "comparison")
     SbertResponseDto.NewsComparisonDto toSbertNewsComparisonDto(News news);
+
+    // SBERT 응답 DTO -> News Entity 변환
+    @Mapping(source = "newsWithSimilarityDto.newsDto.url", target = "url")
+    @Mapping(source = "newsWithSimilarityDto.newsDto.title", target = "title")
+    @Mapping(source = "newsWithSimilarityDto.newsDto.content", target = "content")
+    @Mapping(source = "newsWithSimilarityDto.newsDto.date", target = "date")
+    @Mapping(source = "newsWithSimilarityDto.newsDto.phrases", target = "phrases")
+    @Mapping(source = "newsWithSimilarityDto.similarity", target = "similarity")
+    @Mapping(source = "comparison", target = "comparison")
+    @Mapping(target = "newsId", ignore = true) // DB에서 자동 생성되므로 매핑 제외
+    @Mapping(target = "analysis", ignore = true) // 나중에 서비스에서 설정
+    News sbertDtoToEntity(NewsComparisonDto dto);
+
+    // SBERT 응답 DTO 리스트 -> News Entity 리스트 변환
+    List<News> sbertDtoListToEntityList(List<NewsComparisonDto> dtoList);
 }

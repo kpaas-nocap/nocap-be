@@ -1,7 +1,8 @@
 package com.example.nocap.domain.analysis.dto;
 
-import com.example.nocap.domain.mainnews.dto.MainNewsDto;
-import com.example.nocap.domain.news.dto.NewsDto;
+import com.example.nocap.domain.mainnews.dto.MainNewsResponseDto;
+import com.example.nocap.domain.news.dto.NewsRequestDto;
+import com.example.nocap.domain.news.dto.NewsResponseDto;
 import java.util.ArrayList;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.util.List;
 public class SbertResponseDto {
 
     private String category;
-    private MainNewsDto mainNewsDto;
+    private MainNewsResponseDto mainNewsDto;
     private List<NewsComparisonDto> newsComparisonDtos = new ArrayList<>();
 
     @Data
@@ -30,6 +31,6 @@ public class SbertResponseDto {
     @AllArgsConstructor
     public static class NewsWithSimilarityDto {
         private double similarity;
-        private NewsDto newsDto;
+        private NewsResponseDto newsDto;
     }
 }

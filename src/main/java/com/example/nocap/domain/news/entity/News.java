@@ -1,7 +1,9 @@
 package com.example.nocap.domain.news.entity;
 
 import com.example.nocap.domain.analysis.entity.Analysis;
+import com.example.nocap.global.StringListConverter;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +27,8 @@ public class News {
 
     private String title;
 
+    private String date;
+
     @Column(columnDefinition = "TEXT")
     private String content;
 
@@ -32,4 +36,8 @@ public class News {
 
     @Column(columnDefinition = "TEXT")
     private String comparison;
+
+    @Column(columnDefinition = "LONGTEXT")
+    @Convert(converter = StringListConverter.class)
+    private List<String> phrases;
 }
