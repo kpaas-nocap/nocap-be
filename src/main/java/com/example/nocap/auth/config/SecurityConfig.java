@@ -1,5 +1,6 @@
 package com.example.nocap.auth.config;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,15 +12,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -38,7 +36,7 @@ public class SecurityConfig {
             "/api/nocap/analysis/{id:\\d+}",
             "/api/nocap/analysis/keyword/{keyword}",
             "/api/nocap/search/**",
-            "/api/nocap/popnews", "/swagger-ui.html", "/webjars/**",
+            "/api/nocap/popnews", "/swagger-ui/**", "/webjars/**",
 
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
