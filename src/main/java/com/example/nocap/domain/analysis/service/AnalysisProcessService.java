@@ -9,7 +9,6 @@ import com.example.nocap.domain.analysis.dto.SbertResponseDto;
 import com.example.nocap.domain.analysis.dto.TitleCategoryDto;
 import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.domain.analysis.mapper.AnalysisMapper;
-import com.example.nocap.domain.analysis.repository.AnalysisRepository;
 import com.example.nocap.domain.mainnews.entity.MainNews;
 import com.example.nocap.domain.mainnews.mapper.MainNewsMapper;
 import com.example.nocap.domain.mainnews.repository.MainNewsRepository;
@@ -18,12 +17,10 @@ import com.example.nocap.domain.user.entity.User;
 import com.example.nocap.domain.user.repository.UserRepository;
 import com.example.nocap.exception.CustomException;
 import com.example.nocap.exception.ErrorCode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -89,8 +86,8 @@ public class AnalysisProcessService {
                 SbertRequestDto sbertRequestDto = SbertRequestDto.builder()
                     .plan(plan)
                     .category(existingAnalysis.getCategory())
-                    .mainNewsDto(mainNewsMapper.toMainNewsDto(mainNews))
-                    .newsDtos(newsMapper.toNewsDtoList(existingAnalysis.getRelatedNews()))
+                    .mainNewsDto(mainNewsMapper.toMainNewsRequestDto(mainNews))
+                    .newsDtos(newsMapper.toNewsRequestDtoList(existingAnalysis.getRelatedNews()))
                     .build();
                 SbertResponseDto sbertResponseDto = requestFastAPi(sbertRequestDto);
                 // 비교를 갱신하여 다시 저장
@@ -134,7 +131,7 @@ public class AnalysisProcessService {
         SbertRequestDto sbertRequestDto = SbertRequestDto.builder()
             .plan(plan)
             .category(titleCategoryDto.getCategory())
-            .mainNewsDto(mainNewsMapper.toMainNewsDto(mainNews))
+            .mainNewsDto(mainNewsMapper.toMainNewsRequestDto(mainNews))
             .newsDtos(crawledResponseDto.getNewsDtos())
             .build();
 
@@ -148,6 +145,7 @@ public class AnalysisProcessService {
 
     private SbertResponseDto requestFastAPi(SbertRequestDto sbertRequestDto) {
         SbertResponseDto sbertResponseDto;
+
         try {
             return sbertResponseDto = webClient.post() // POST 요청
                 .uri("/analyze") //FastAPI 서버의 엔드포인트 경로
