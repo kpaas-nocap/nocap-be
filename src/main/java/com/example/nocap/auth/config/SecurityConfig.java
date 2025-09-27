@@ -24,22 +24,29 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
     public static final String[] ALLOWED_URLS = {
+        // 인증 관련
+        "/auth/kakao/**",
+        "/auth/login/kakao",
+        "/auth/form/**",
 
-            "/api/nocap/analysis/{id:\\d+}",
-            "/api/nocap/analysis/keyword/{keyword}",
-            "/api/nocap/search/**",
-            "/api/nocap/search/**/**",
-            "/auth/kakao/**", "/auth/login/kakao", "/auth/form/**", "/swagger-ui/**",
-            "/v3/api-docs/**", "/swagger-resources/**",
-            "/api/nocap/analysis/healthCheck", // 헬스 체크
-            "/api/nocap/analysis",             // 전체 분석 목록 조회 (GET), 새 분석 요청 (POST)
-            "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
-            "/api/nocap/analysis/{id:\\d+}",
-            "/api/nocap/analysis/keyword/{keyword}",
-            "/api/nocap/search/**",
-            "/api/nocap/popnews", "/swagger-ui/**", "/webjars/**",
-            "/actuator/health", "/actuator/health/**"
+        // API 엔드포인트들
+        "/api/nocap/analysis",               // 전체 분석 목록 조회 (GET), 새 분석 요청 (POST)
+        "/api/nocap/analysis/healthCheck",   // 헬스 체크
+        "/api/nocap/analysis/{id:\\d+}",     // 특정 분석 조회
+        "/api/nocap/analysis/keyword/{keyword}", // 키워드별 분석 조회
+        "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
+        "/api/nocap/search/**",              // 뉴스 검색 관련 모든 경로 (category, keyword 포함)
+        "/api/nocap/popnews",                // 인기 뉴스
 
+        // Swagger 문서
+        "/swagger-ui/**",
+        "/v3/api-docs/**",
+        "/swagger-resources/**",
+        "/webjars/**",
+
+        // 헬스체크
+        "/actuator/health",
+        "/actuator/health/**"
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Bean
