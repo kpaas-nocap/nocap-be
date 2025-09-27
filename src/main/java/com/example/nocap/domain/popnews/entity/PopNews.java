@@ -30,5 +30,7 @@ public class PopNews {
 
     private String image;
 
+    private String date;
+
 
 }

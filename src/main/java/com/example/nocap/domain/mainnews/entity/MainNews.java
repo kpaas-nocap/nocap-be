@@ -1,7 +1,17 @@
 package com.example.nocap.domain.mainnews.entity;
 
 import com.example.nocap.domain.analysis.entity.Analysis;
-import jakarta.persistence.*;
+import com.example.nocap.global.StringListConverter;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,8 +38,14 @@ public class MainNews {
 
     private String title;
 
+    private String date;
+
     @Column(columnDefinition = "TEXT")
     private String content;
 
     private String image;
+
+    @Column(columnDefinition = "LONGTEXT")
+    @Convert(converter = StringListConverter.class)
+    private List<String> phrases;
 }

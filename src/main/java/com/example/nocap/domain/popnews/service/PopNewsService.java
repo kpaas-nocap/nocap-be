@@ -37,6 +37,7 @@ public class PopNewsService {
     @Transactional
     @Scheduled(cron = "0 0 4 * * ?")
     public void requestPopNews() {
+        System.out.println("인기뉴스 크롤링이 수행됩니다.");
 
         // 배포시에는 살려야할 부분과 서버에 설치해야되는 것들
         // System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
@@ -84,6 +85,7 @@ public class PopNewsService {
                             .title(extractedArticle.getTitle())
                             .content(extractedArticle.getContent())
                             .image(extractedArticle.getImage())
+                                .date(extractedArticle.getDate())
                             .build());
                     }
                 } catch (Exception e) {
