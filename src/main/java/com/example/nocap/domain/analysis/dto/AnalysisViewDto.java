@@ -1,7 +1,8 @@
 package com.example.nocap.domain.analysis.dto;
 
 import com.example.nocap.domain.analysis.dto.SbertResponseDto.NewsComparisonDto;
-import com.example.nocap.domain.mainnews.dto.MainNewsDto;
+import com.example.nocap.domain.mainnews.dto.MainNewsRequestDto;
+import com.example.nocap.domain.mainnews.dto.MainNewsResponseDto;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
@@ -15,7 +16,7 @@ public class AnalysisViewDto {
     private Long view;
     private LocalDateTime date;
     private String image; // MainNews의 image url
-    private MainNewsDto mainNewsDto;
+    private MainNewsResponseDto mainNewsDto;
     private List<NewsComparisonDto> newsComparisonDtos;
 
 }

@@ -2,12 +2,13 @@ package com.example.nocap.domain.analysis.service;
 
 import com.example.nocap.domain.analysis.dto.CrawledResponseDto;
 import com.example.nocap.domain.analysis.dto.NewsSearchResponseDto;
-import com.example.nocap.domain.news.dto.NewsDto;
+import com.example.nocap.domain.news.dto.NewsRequestDto;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,29 +17,30 @@ public class CrawlingService {
      //NewsResponse 에 담긴 각 아이템의 originallink 로 크롤링을 수행하여
      //CrawledNewsResponse 로 반환
     public CrawledResponseDto crawlNews(NewsSearchResponseDto newsSearchResponseDto) {
-        List<NewsDto> crawledNews = new ArrayList<>();
+        List<NewsRequestDto> crawledNews = new ArrayList<>();
 
         for (NewsSearchResponseDto.Item item : newsSearchResponseDto.getItems()) {
             String url = item.getOriginallink();
-            String fullText;
+            String fullHtmlContent;
             try {
                 Document doc = Jsoup.connect(url)
                     .userAgent("Mozilla/5.0")
                     .timeout(5000)
                     .get();
-                if (doc.selectFirst("article") != null) {
-                    fullText = doc.select("article").text();
-                } else {
-                    fullText = doc.body().text();
+                Element bodyEl = doc.selectFirst("article");
+                if (bodyEl == null) {
+                    bodyEl = doc.body();
                 }
+                fullHtmlContent = bodyEl.html();
             } catch (IOException e) {
-                fullText = "[크롤링 실패] " + e.getMessage();
+                continue;
             }
-            if (fullText != null && !fullText.trim().isEmpty()) { // 빈 문자열을 내보내지 않도록
-                crawledNews.add(new NewsDto(
+            if (fullHtmlContent != null && !fullHtmlContent.trim().isEmpty()) {
+                crawledNews.add(new NewsRequestDto(
                     url,
                     item.getTitle(),
-                    fullText
+                    item.getPubDate(),
+                    fullHtmlContent // HTML이 포함된 본문 전달
                 ));
             }
         }

@@ -1,6 +1,6 @@
 package com.example.nocap.domain.analysis.dto;
 
-import com.example.nocap.domain.news.dto.NewsDto;
+import com.example.nocap.domain.news.dto.NewsRequestDto;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +9,6 @@ import lombok.Data;
 @Builder
 public class CrawledResponseDto {
 
-    private List<NewsDto> newsDtos;
+    private List<NewsRequestDto> newsDtos;
 
 }
