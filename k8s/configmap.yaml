@@ -5,6 +5,8 @@ metadata:
   namespace: nocap
 data:
   application.yml: |
+    server:
+      forward-headers-strategy: framework
     spring:
       application:
         name: nocap
