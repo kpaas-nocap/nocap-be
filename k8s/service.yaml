@@ -4,7 +4,7 @@ metadata:
   name: nocap-be
   namespace: nocap
 spec:
-  type: ClusterIP   # <-- LoadBalancer → ClusterIP 로 변경
+  type: ClusterIP  
   selector:
     app: nocap-be
   ports:
