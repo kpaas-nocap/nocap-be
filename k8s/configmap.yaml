@@ -7,37 +7,24 @@ data:
   application.yml: |
     server:
       forward-headers-strategy: framework
-      tomcat:
-        threads:
-          max: 50
-          min-spare: 8
-        accept-count: 50
     spring:
       application:
         name: nocap
-      main:
-        lazy-initialization: true
       datasource:
         url: ${SPRING_DATASOURCE_URL}
         username: ${SPRING_DATASOURCE_USERNAME}
         password: ${SPRING_DATASOURCE_PASSWORD}
         driver-class-name: com.mysql.cj.jdbc.Driver
-        hikari:
-          maximum-pool-size: 5
-          minimum-idle: 2
-          idle-timeout: 30000
-          max-lifetime: 1800000
-          connection-timeout: 20000
       jpa:
         database: mysql
         database-platform: org.hibernate.dialect.MySQLDialect
         hibernate:
           ddl-auto: update
-        show-sql: false
+        show-sql: true
         properties:
           hibernate:
             format_sql: false
-            use_sql_comments: false
+            use_sql_comments: true
       jwt:
         secret: ${JWT_SECRET}
         access-token-expiration-ms: 6000000
@@ -68,8 +55,3 @@ data:
         web:
           exposure:
             include: health,info
-    logging:
-      level:
-        root: INFO
-        org.hibernate.SQL: OFF
-        org.hibernate.type.descriptor.sql.BasicBinder: OFF
