@@ -45,6 +45,10 @@ public class ArticleExtractionService {
 
             String canonicalUrl = createCanonicalUrl(doc, url); // 정규화 로직 적용
 
+            if (htmlContent == null || htmlContent.trim().isEmpty()) {
+                throw new CustomException(ErrorCode.EXTERNAL_API_ERROR);
+            }
+
             return MainNews.builder()
                 .url(url)
                 .canonicalUrl(canonicalUrl)
@@ -115,7 +119,7 @@ public class ArticleExtractionService {
             return null;
         }
 
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // ✨ 최종 출력 형식
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 최종 출력 형식
 
         List<DateTimeFormatter> formatters = List.of(
             DateTimeFormatter.ISO_OFFSET_DATE_TIME,
