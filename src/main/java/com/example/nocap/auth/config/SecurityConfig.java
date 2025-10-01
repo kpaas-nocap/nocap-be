@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -37,7 +38,6 @@ public class SecurityConfig {
         "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
         "/api/nocap/search/**",              // 뉴스 검색 관련 모든 경로 (category, keyword 포함)
         "/api/nocap/popnews",                // 인기 뉴스
-        "/api/nocap/comment",                // 댓글
 
         // Swagger 문서
         "/swagger-ui/**",
@@ -94,6 +94,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(HttpMethod.GET, "/api/nocap/comment/get/**").permitAll()
                         .requestMatchers(ALLOWED_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
