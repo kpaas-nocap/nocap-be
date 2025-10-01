@@ -5,6 +5,7 @@ import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.domain.analysis.repository.AnalysisRepository;
 import com.example.nocap.domain.comment.dto.CommentRequestDto;
 import com.example.nocap.domain.comment.dto.CommentResponseDto;
+import com.example.nocap.domain.comment.dto.MyCommentResponseDto;
 import com.example.nocap.domain.comment.dto.RecommendDto;
 import com.example.nocap.domain.comment.dto.RecommendType;
 import com.example.nocap.domain.comment.entity.Comment;
@@ -62,10 +63,10 @@ public class CommentService {
             .toList();
     }
 
-    public List<CommentResponseDto> getMyComment(UserDetail userDetail) {
+    public List<MyCommentResponseDto> getMyComment(UserDetail userDetail) {
         List<Comment> commentList = commentRepository.findByUser(userDetail.getUser());
         return commentList.stream()
-            .map(commentMapper::toCommentResponseDto)
+            .map(commentMapper::toMyCommentResponseDto)
             .toList();
     }
 

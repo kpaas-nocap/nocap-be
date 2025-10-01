@@ -3,6 +3,7 @@ package com.example.nocap.domain.comment.controller;
 import com.example.nocap.auth.dto.response.UserDetail;
 import com.example.nocap.domain.comment.dto.CommentRequestDto;
 import com.example.nocap.domain.comment.dto.CommentResponseDto;
+import com.example.nocap.domain.comment.dto.MyCommentResponseDto;
 import com.example.nocap.domain.comment.dto.RecommendDto;
 import com.example.nocap.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,7 +55,7 @@ public class CommentController {
         responses = { /* ... */ }
     )
     @GetMapping("/my")
-    public ResponseEntity<List<CommentResponseDto>> getMyComment(@AuthenticationPrincipal
+    public ResponseEntity<List<MyCommentResponseDto>> getMyComment(@AuthenticationPrincipal
     UserDetail userDetail) {
         return ResponseEntity.ok(commentService.getMyComment(userDetail));
     }
