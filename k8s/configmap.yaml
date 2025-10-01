@@ -5,6 +5,8 @@ metadata:
   namespace: nocap
 data:
   application.yml: |
+    server:
+      forward-headers-strategy: framework
     spring:
       application:
         name: nocap
@@ -31,7 +33,6 @@ data:
           client: ${KAKAO_CLIENT}
           client-secret: ${KAKAO_SECRET}
           redirect: https://nocap-omega.vercel.app/login
-      
       ai:
         openai:
           api-key: ${OPENAI_API_KEY}
