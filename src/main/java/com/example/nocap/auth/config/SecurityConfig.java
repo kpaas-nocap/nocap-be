@@ -35,6 +35,7 @@ public class SecurityConfig {
         "/api/nocap/analysis/{id:\\d+}",     // 특정 분석 조회
         "/api/nocap/analysis/keyword/{keyword}", // 키워드별 분석 조회
         "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
+        "/api/nocap/analysis/check", // 분석 여부 조회
         "/api/nocap/search/**",              // 뉴스 검색 관련 모든 경로 (category, keyword 포함)
         "/api/nocap/popnews",                // 인기 뉴스
 
