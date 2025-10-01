@@ -54,4 +54,9 @@ public class Analysis {
         this.relatedNews = relatedNews;
         relatedNews.forEach(news -> news.setAnalysis(this));
     }
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+        comment.setAnalysis(this);
+    }
 }
