@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.mapstruct.control.MappingControl.Use;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,11 +39,15 @@ public class CommentService {
         Long id = userDetail.getId();
         Long analysisId = commentRequestDto.getAnalysisId();
 
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
         Optional<Analysis> optionalAnalysis = Optional.of(analysisRepository.findById(analysisId)
             .orElseThrow(() -> new CustomException(ErrorCode.ANALYSIS_NOT_FOUND)));
         Analysis analysis = optionalAnalysis.get();
 
         Comment comment = Comment.builder()
+            .user(user)
             .date(LocalDateTime.now())
             .content(commentRequestDto.getContent())
             .analysis(analysis)
