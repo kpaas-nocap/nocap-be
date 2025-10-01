@@ -10,6 +10,9 @@ public enum ErrorCode {
 
     // 400 Bad Request: 잘못된 요청
     NOT_A_NEWS_ARTICLE(HttpStatus.BAD_REQUEST, "제공된 URL은 뉴스 기사가 아닙니다."),
+    EMPTY_INPUT(HttpStatus.BAD_REQUEST, "검색어가 입력되지 않았습니다."),
+    NO_POINT(HttpStatus.BAD_REQUEST, "포인트가 부족합니다."),
+    ALREADY_ANALYZED_NEWS(HttpStatus.BAD_REQUEST, "이미 분석된 뉴스입니다."),
 
     // 401 Unauthorized: 인증되지 않은 사용자
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요한 요청입니다."),
@@ -26,7 +29,9 @@ public enum ErrorCode {
 
     // 500 Internal Server Error: 서버 내부 오류
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부에 알 수 없는 오류가 발생했습니다."),
+    NEWS_EXTRACTING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "뉴스 추출에 실패하여 오류가 발생했습니다."),
     EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "외부 API 호출 중 오류가 발생했습니다."),
+    OPEN_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Open API 호출 중 오류가 발생했습니다."),
     LAMBDA_REQUEST_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "람다 호출 중 오류가 발생했습니다."),
     OPENAI_CREDIT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI의 크레딧이 부족하여 오류가 발생했습니다.");
 

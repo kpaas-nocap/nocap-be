@@ -20,12 +20,12 @@ import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SearchService {
+public class NaverNewsService {
 
     private final NaverApiConfig config;
     private final ObjectMapper mapper;
 
-    public SearchService(NaverApiConfig config, ObjectMapper mapper) {
+    public NaverNewsService(NaverApiConfig config, ObjectMapper mapper) {
         this.config = config;
         this.mapper = mapper;
     }

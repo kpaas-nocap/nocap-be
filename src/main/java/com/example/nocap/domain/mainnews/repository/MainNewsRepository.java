@@ -10,4 +10,7 @@ public interface MainNewsRepository extends JpaRepository<MainNews, Long> {
 
     Optional<MainNews> findByCanonicalUrl(String canonicalUrl); // 이미 존재하는 분석 탐색용
 
+    boolean existsByCanonicalUrl(String canonicalUrl);
+
+    boolean existsByUrl(String url);
 }
