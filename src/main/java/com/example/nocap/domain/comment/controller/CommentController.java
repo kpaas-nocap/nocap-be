@@ -77,7 +77,7 @@ public class CommentController {
         description = "댓글 아이디와 추천여부(RECPMMEND/NON_RECOMMEND)를 통해 추천/비추천을 생성",
         responses = { /* ... */ }
     )
-    @PostMapping("/recommend/{commentId}")
+    @PostMapping("/recommend")
     public ResponseEntity<CommentResponseDto> RecommendComment(@RequestBody RecommendDto recommendDto, @AuthenticationPrincipal UserDetail userDetail) {
         return ResponseEntity.ok(commentService.recommendComment(recommendDto, userDetail));
     }
