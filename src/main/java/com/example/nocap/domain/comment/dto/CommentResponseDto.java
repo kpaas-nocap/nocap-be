@@ -6,6 +6,8 @@ import lombok.Data;
 @Data
 public class CommentResponseDto {
 
+    private Long commentId;
+
     private String content;
 
     private LocalDateTime date;
