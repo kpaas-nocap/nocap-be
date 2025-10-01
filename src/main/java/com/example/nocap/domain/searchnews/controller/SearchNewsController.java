@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "SearchNews", description = "뉴스 검색 API") // ✨ 1. @Tag 어노테이션 이동
@@ -32,14 +33,36 @@ public class SearchNewsController {
         return ResponseEntity.ok(searchNewsService.getNewsByCategory(category));
     }
 
+//    @Operation(
+//        summary = "키워드별 뉴스 검색",
+//        description = "입력된 키워드를 통한 뉴스 조회.",
+//        parameters = { @Parameter(name = "keyword", description = "뉴스 검색 키워드", required = true, example = "축구"),},
+//        responses = { /* ... */ }
+//    )
+//    @GetMapping("/keyword/{keyword}")
+//    public ResponseEntity<List<SearchNewsDto>> getNewsByKeyword(@PathVariable("keyword") String keyword) {
+//        return ResponseEntity.ok(searchNewsService.getNewsByKeyword(keyword));
+//    }
+//
+//    @Operation(
+//        summary = "URL 뉴스 검색",
+//        description = "입력된 URL을 통한 뉴스 조회.",
+//        parameters = { @Parameter(name = "keyword", description = "뉴스 검색 키워드", required = true, example = "축구"),},
+//        responses = { /* ... */ }
+//    )
+//    @GetMapping("/url/{url}")
+//    public ResponseEntity<List<SearchNewsDto>> getNewsByUrl(@PathVariable("url") String url) {
+//        return ResponseEntity.ok(searchNewsService.getNewsByUrl(url));
+//    }
+
     @Operation(
-        summary = "키워드별 뉴스 검색",
-        description = "입력된 키워드를 통한 뉴스 조회.",
-        parameters = { @Parameter(name = "keyword", description = "뉴스 검색 키워드", required = true, example = "축구"),},
+        summary = "검색어 혹은 URL을 통한 뉴스 검색",
+        description = "입력된 검색어를 검색어와 URL로 구분한 후 뉴스 조회.",
+        parameters = { @Parameter(name = "search", description = "검색어", required = true, example = "축구"),},
         responses = { /* ... */ }
     )
-    @GetMapping("/keyword/{keyword}")
-    public ResponseEntity<List<SearchNewsDto>> getNewsByKeyword(@PathVariable("keyword") String keyword) {
-        return ResponseEntity.ok(searchNewsService.getNewsByKeyword(keyword));
+    @GetMapping
+    public ResponseEntity<List<SearchNewsDto>> getNewsBySearch(@RequestParam("search") String search) {
+        return ResponseEntity.ok(searchNewsService.getNewsBySearch(search));
     }
 }

@@ -26,6 +26,7 @@ public class Analysis {
     private Long analysisId;
 
     @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<UserAnalysis> userAnalyses = new ArrayList<>();
 
     private String category;
@@ -43,7 +44,7 @@ public class Analysis {
     @OneToOne(mappedBy = "analysis", cascade = CascadeType.ALL)
     private MainNews mainNews;
 
-    private String version; // 비교가 일반인지 프리미엄인지에 대한 상태
+    private String plan; // 비교가 일반인지 프리미엄인지에 대한 상태
 
     public void setMainNews(MainNews mainNews) {
         this.mainNews = mainNews;
@@ -53,5 +54,10 @@ public class Analysis {
     public void setRelatedNews(List<News> relatedNews) {
         this.relatedNews = relatedNews;
         relatedNews.forEach(news -> news.setAnalysis(this));
+    }
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+        comment.setAnalysis(this);
     }
 }

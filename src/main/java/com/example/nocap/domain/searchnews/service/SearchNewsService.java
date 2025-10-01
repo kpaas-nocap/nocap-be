@@ -1,8 +1,11 @@
 package com.example.nocap.domain.searchnews.service;
 
 import com.example.nocap.domain.analysis.service.ArticleExtractionService;
+import com.example.nocap.domain.mainnews.entity.MainNews;
 import com.example.nocap.domain.searchnews.dto.NewsSearchResponseDto;
 import com.example.nocap.domain.searchnews.dto.SearchNewsDto;
+import com.example.nocap.exception.CustomException;
+import com.example.nocap.exception.ErrorCode;
 import com.example.nocap.global.NaverApiConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
@@ -10,17 +13,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import net.dankito.readability4j.Article;
+import net.dankito.readability4j.Readability4J;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -41,8 +50,7 @@ public class SearchNewsService {
 
     private static final Logger log = LoggerFactory.getLogger(SearchNewsService.class);
 
-
-
+    // 카테고리별 뉴스 검색
     public List<SearchNewsDto> getNewsByCategory(int category) {
         String sectionUrl = String.format(SECTION_URL_TEMPLATE, category);
 
@@ -158,7 +166,7 @@ public class SearchNewsService {
                     return SearchNewsDto.builder()
                         .url(originalUrl)
                         .title(item.getTitle())
-                        .date(convertRfcToSimpleFormat(item.getPubDate())) // 날짜 변환
+                        .date(parseDateString(item.getPubDate())) // 날짜 변환
                         .content(extracted.getContent())
                         .image(extracted.getImage())
                         .build();
@@ -169,18 +177,6 @@ public class SearchNewsService {
             })
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    }
-
-    private String convertRfcToSimpleFormat(String rfcDateString) {
-        try {
-            DateTimeFormatter inputFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            ZonedDateTime zonedDateTime = ZonedDateTime.parse(rfcDateString, inputFormatter);
-            return zonedDateTime.format(outputFormatter);
-        } catch (Exception e) {
-            log.warn("날짜 형식 변환 실패: {}", rfcDateString);
-            return rfcDateString; // 변환 실패 시 원본 반환
-        }
     }
 
     private String requestRawJson(String rawKeyword) {
@@ -247,5 +243,183 @@ public class SearchNewsService {
         } catch (IOException e) {
             throw new RuntimeException("응답 읽기 실패", e);
         }
+    }
+
+
+    // URL로 뉴스 검색
+    public List<SearchNewsDto> getNewsByUrl(String url) {
+        return List.of(extract(url));
+    }
+
+    public SearchNewsDto extract(String url) {
+        try {
+            Document doc = Jsoup.connect(url).get();
+            if (!isArticleByConfidenceScore(doc)) {
+                throw new CustomException(ErrorCode.NOT_A_NEWS_ARTICLE);
+            }
+
+            preprocessDocument(doc);
+
+            String ogTitle = getMetaTagContent(doc, "og:title");
+            String ogImage = getMetaTagContent(doc, "og:image");
+
+            Article article = new Readability4J(url, doc.html()).parse();
+            String htmlContent = article.getContent();
+
+            String finalTitle = (!ogTitle.isEmpty()) ? ogTitle : article.getTitle();
+            finalTitle = unescape(finalTitle);
+
+            String pubDateString = extractPublishedDate(doc);
+            String pubDate = parseDateString(pubDateString); // String -> LocalDateTime 변환
+
+            if (htmlContent == null || htmlContent.trim().isEmpty()) {
+                throw new CustomException(ErrorCode.NEWS_EXTRACTING_ERROR);
+            }
+            return SearchNewsDto.builder()
+                .url(url)
+                .title(finalTitle)
+                .content(htmlContent)
+                .image(ogImage)
+                .date(pubDate)
+                .build();
+
+        } catch (IOException e) {
+            throw new CustomException(ErrorCode.NEWS_EXTRACTING_ERROR);
+        }
+    }
+
+    private void preprocessDocument(Document doc) {
+        doc.select(".read_cont, em.img_desc, span.img_desc, .desc_thumb").remove();
+    }
+
+    private String unescape(String text) {
+        if (text == null) return null;
+        return text.replace("\\\"", "\"").replace("\\'", "'");
+    }
+
+    private String getMetaTagContent(Document doc, String property) {
+        Element metaTag = doc.selectFirst("meta[property=" + property + "]");
+        return (metaTag != null) ? metaTag.attr("content") : "";
+    }
+
+    private String extractPublishedDate(Document doc) {
+        // 우선순위대로 날짜를 포함할 가능성이 높은 선택자 목록
+        String[] dateSelectors = {
+            "meta[property=article:published_time]", // 1순위: 국제 표준 메타 태그
+            "span.num_date",
+            "span._ARTICLE_DATE_TIME",              // 2순위: 네이버 뉴스
+            "span.t11",                             // 3순위: 네이버 뉴스 (구버전)
+            "span[class*='date']",                  // 4순위: 'date' 클래스를 포함하는 span
+            "time"                                  // 5순위: <time> 태그
+        };
+
+        for (String selector : dateSelectors) {
+            Element dateElement = doc.selectFirst(selector);
+            if (dateElement != null) {
+                if (dateElement.hasAttr("content")) return dateElement.attr("content");
+                if (dateElement.hasAttr("data-date-time")) return dateElement.attr("data-date-time");
+                return dateElement.text();
+            }
+        }
+        return null; // 날짜를 찾지 못한 경우
+    }
+
+    private String parseDateString(String dateString) {
+        if (dateString == null || dateString.isBlank()) {
+            return null;
+        }
+
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 최종 출력 형식
+
+        List<DateTimeFormatter> formatters = List.of(
+            DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+            DateTimeFormatter.RFC_1123_DATE_TIME,
+            DateTimeFormatter.ofPattern("yyyy. M. d. HH:mm"),
+            DateTimeFormatter.ofPattern("yyyy.MM.dd. a H:mm"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        );
+
+        for (DateTimeFormatter formatter : formatters) {
+            try {
+                // 시간대 정보가 포함된 형식(RFC, ISO)은 ZonedDateTime으로 파싱
+                return ZonedDateTime.parse(dateString, formatter).format(outputFormatter);
+            } catch (java.time.format.DateTimeParseException e1) {
+                try {
+                    // 시간대 정보가 없는 형식은 LocalDateTime으로 파싱
+                    return LocalDateTime.parse(dateString, formatter).format(outputFormatter);
+                } catch (java.time.format.DateTimeParseException e2) {
+                    // 둘 다 실패하면 다음 포맷터로 계속
+                }
+            }
+        }
+
+        // 정규식으로 'YYYY-MM-DD' 또는 'YYYY.MM.DD' 형태만 추출 시도
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\d{4}[-.]\\d{2}[-.]\\d{2}");
+        java.util.regex.Matcher matcher = pattern.matcher(dateString);
+        if (matcher.find()) {
+            return matcher.group(0).replace(".", "-");
+        }
+
+        return null; // 모든 형식에 실패하면 null 반환
+    }
+
+    private boolean isArticleByConfidenceScore(Document doc) {
+        int confidenceScore = 0;
+        final int THRESHOLD = 4;
+
+        Element ogTypeElement = doc.selectFirst("meta[property=og:type]");
+        if (ogTypeElement != null && "article".equalsIgnoreCase(ogTypeElement.attr("content"))) {
+            confidenceScore += 5;
+        }
+        if (doc.selectFirst("article") != null) {
+            confidenceScore += 3;
+        }
+        if (doc.selectFirst("div[class*='article'], div[class*='content'], div[id*='article'], div[id*='content']") != null) {
+            confidenceScore += 2;
+        }
+        if (doc.selectFirst("h1") != null) {
+            confidenceScore += 1;
+        }
+
+        return confidenceScore >= THRESHOLD;
+    }
+
+    public List<SearchNewsDto> getNewsBySearch(String search) {
+        if (isUrl(search)) {
+            return getNewsByUrl(search);
+        } else {
+            return getNewsByKeyword(search);
+        }
+    }
+
+    private static final Pattern IP_ADDRESS_PATTERN =
+        Pattern.compile("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$");
+
+    public static boolean isUrl(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            throw new CustomException(ErrorCode.EMPTY_INPUT);
+        }
+
+        String trimmedInput = input.trim();
+
+        // 1. 형식 검사: URL의 명확한 특징이 있는가?
+        if (trimmedInput.matches("^[a-zA-Z]+://.*")) {
+            return true;
+        }
+        if (trimmedInput.toLowerCase().startsWith("www.")) {
+            return true;
+        }
+        if (trimmedInput.toLowerCase().startsWith("localhost")) {
+            return true;
+        }
+        if (IP_ADDRESS_PATTERN.matcher(trimmedInput).matches()) {
+            return true;
+        }
+        if (trimmedInput.contains(".") && !trimmedInput.contains(" ")) {
+            return true;
+        }
+
+        // 2. 위의 모든 URL 조건에 해당하지 않으면 검색어 (false)
+        return false;
     }
 }
