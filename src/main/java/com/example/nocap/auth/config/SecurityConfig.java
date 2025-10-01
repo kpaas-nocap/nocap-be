@@ -37,6 +37,7 @@ public class SecurityConfig {
         "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
         "/api/nocap/search/**",              // 뉴스 검색 관련 모든 경로 (category, keyword 포함)
         "/api/nocap/popnews",                // 인기 뉴스
+        "/api/nocap/comment",                // 댓글
 
         // Swagger 문서
         "/swagger-ui/**",
