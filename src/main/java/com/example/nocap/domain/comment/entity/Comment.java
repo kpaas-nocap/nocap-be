@@ -32,7 +32,9 @@ public class Comment {
 
     private LocalDateTime date;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
     private int recommendation = 0;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
     private int nonRecommendation = 0;
 }
