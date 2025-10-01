@@ -32,7 +32,7 @@ public class Comment {
 
     private LocalDateTime date;
 
-    private int recommandation;
+    private int recommendation = 0;
 
-    private int nonRecommandation;
+    private int nonRecommendation = 0;
 }
