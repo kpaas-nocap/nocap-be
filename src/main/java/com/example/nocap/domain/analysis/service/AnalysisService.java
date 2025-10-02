@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -34,24 +35,29 @@ public class AnalysisService {
     private static final Logger log = LoggerFactory.getLogger(AnalysisProcessService.class);
 
 
+    @Transactional(readOnly = true)
     public List<AnalysisDto> getAllAnalysis() {
         return analysisRepository.findAll().stream()
             .map(analysisMapper::toAnalysisDto)
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public AnalysisViewDto getAnalysisById(Long id) {
         Analysis analysis = analysisRepository.findById(id)
             .orElseThrow(() -> new CustomException(ErrorCode.ANALYSIS_NOT_FOUND));
+        analysis.setView(analysis.getView() + 1);
         return analysisMapper.toAnalysisViewDto(analysis);
     }
 
+    @Transactional(readOnly = true)
     public List<AnalysisDto> getAnalysisByCategory(String category) {
         return analysisRepository.findAllByCategory(category).stream()
             .map(analysisMapper::toAnalysisDto)
             .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<AnalysisDto> getAnalysisByUserId(UserDetail userDetail) {
 
         User user = userRepository.findById(userDetail.getId())
@@ -63,6 +69,7 @@ public class AnalysisService {
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public void deleteAnalysisById(Long id) {
         analysisRepository.deleteById(id);
     }
