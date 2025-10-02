@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -32,9 +33,11 @@ public class AnalysisService {
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public AnalysisViewDto getAnalysisById(Long id) {
         Analysis analysis = analysisRepository.findById(id)
             .orElseThrow(() -> new CustomException(ErrorCode.ANALYSIS_NOT_FOUND));
+        analysis.setView(analysis.getView() + 1);
         return analysisMapper.toAnalysisViewDto(analysis);
     }
 

@@ -79,7 +79,7 @@ public class AnalysisController {
 
     @Operation(
         summary = "특정 분석 조회",
-        description = "분석 id를 통해 특정 분석 하나를 조회.",
+        description = "분석 id를 통해 특정 분석 하나를 조회 및 조회수 증가.",
         parameters = { @Parameter(name = "id", description = "분석 ID", required = true, example = "1"),},
         responses = { /* ... */ }
     )
