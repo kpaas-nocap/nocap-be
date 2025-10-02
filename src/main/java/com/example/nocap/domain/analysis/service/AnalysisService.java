@@ -27,6 +27,7 @@ public class AnalysisService {
     private final AnalysisMapper analysisMapper;
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public List<AnalysisDto> getAllAnalysis() {
         return analysisRepository.findAll().stream()
             .map(analysisMapper::toAnalysisDto)
@@ -41,12 +42,14 @@ public class AnalysisService {
         return analysisMapper.toAnalysisViewDto(analysis);
     }
 
+    @Transactional(readOnly = true)
     public List<AnalysisDto> getAnalysisByCategory(String category) {
         return analysisRepository.findAllByCategory(category).stream()
             .map(analysisMapper::toAnalysisDto)
             .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<AnalysisDto> getAnalysisByUserId(UserDetail userDetail) {
 
         User user = userRepository.findById(userDetail.getId())
@@ -58,6 +61,7 @@ public class AnalysisService {
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public void deleteAnalysisById(Long id) {
         analysisRepository.deleteById(id);
     }
