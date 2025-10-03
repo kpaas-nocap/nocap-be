@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "SearchNews", description = "뉴스 검색 API") // ✨ 1. @Tag 어노테이션 이동
+@Tag(name = "SearchNews", description = "뉴스 검색 API") //
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/nocap/search")

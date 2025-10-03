@@ -13,12 +13,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
@@ -45,100 +47,117 @@ public class SearchNewsService {
 
     public List<SearchNewsDto> getNewsByCategory(int category) {
         String sectionUrl = String.format(SECTION_URL_TEMPLATE, category);
-
         try {
-            Document sectionDoc = Jsoup.connect(sectionUrl)
-                .userAgent("Mozilla/5.0")
-                .timeout(5_000)
-                .get();
-
-            List<String> urls = sectionDoc.select("a[href^=\"https://n.news.naver.com/mnews/article\"]")
+            Document sectionDoc = Jsoup.connect(sectionUrl).userAgent("Mozilla/5.0").get();
+            List<String> naverUrls = sectionDoc.select("a[href^=\"https://n.news.naver.com/mnews/article\"]")
                 .stream()
                 .map(a -> a.absUrl("href"))
                 .distinct()
                 .filter(u -> !u.contains("/article/comment/"))
+                .limit(10)
                 .toList();
 
-            // 병렬 스트림으로 각 URL을 파싱하여 List<SearchNewsDto>를 직접 반환
-            return urls.parallelStream()
-                .map(url -> {
+            return naverUrls.parallelStream()
+                .map(naverUrl -> {
                     try {
-                        return parse(url); // parse 메소드가 이제 SearchNewsDto를 반환
-                    } catch (IOException | IllegalStateException e) {
-                        System.err.println("파싱 실패: " + url + " / " + e.getMessage());
+                        Document doc = Jsoup.connect(naverUrl).userAgent("Mozilla/5.0").get();
+                        return parse(doc);
+                    } catch (Exception e) {
+                        log.error("카테고리 기사 크롤링 실패: {} - 오류: {}", naverUrl, e.getMessage());
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .toList();
+                .collect(Collectors.toList());
 
         } catch (IOException e) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_GATEWAY,
-                "섹션 크롤링 실패: " + e.getMessage(), e
-            );
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "섹션 크롤링 실패: " + e.getMessage(), e);
         }
     }
 
-    public SearchNewsDto parse(String url) throws IOException {
-        Document doc = Jsoup.connect(url)
-            .userAgent("Mozilla/5.0")
-            .timeout(5_000)
-            .get();
+    /**
+     * Document 객체를 받아 뉴스 정보를 추출하는 메소드
+     */
+    public SearchNewsDto parse(Document doc) {
 
-        String title = null;
-        String[] titleSelectors = {"meta[property=og:title]", "#articleTitle", "h2#title_area", ".media_end_head_headline span"};
-        for (String sel : titleSelectors) {
-            Element e = doc.selectFirst(sel);
-            if (e != null) {
-                title = e.hasAttr("content") ? e.attr("content") : e.text();
-                break;
-            }
+        // 1. 원본 기사 URL 추출
+        Element originalLinkElement = doc.selectFirst("a.media_end_head_origin_link");
+        String finalUrl = (originalLinkElement != null) ? originalLinkElement.attr("href") : doc.location();
+
+        // 2. 제목, 이미지, 날짜 추출
+        String title = getMetaTagContent(doc, "og:title");
+        String image = getMetaTagContent(doc, "og:image");
+        String date = extractPublishedDate(doc);
+
+        // ✨ 3. 본문을 HTML 태그 포함하여 추출
+        Element bodyEl = doc.selectFirst("#dic_area");
+        if (bodyEl == null) {
+            throw new IllegalStateException("본문 요소를 찾을 수 없습니다: " + doc.location());
         }
-        if (title == null) throw new IllegalStateException("제목을 찾을 수 없습니다: " + url);
 
-        String date = null;
-        String[] dateSelectors = {"meta[property=article:published_time]", "span.t11", "span._ARTICLE_DATE_TIME"};
-        for (String sel : dateSelectors) {
-            Element e = doc.selectFirst(sel);
-            if (e != null) {
-                if (e.hasAttr("content")) date = e.attr("content");
-                else if (e.hasAttr("data-date-time")) date = e.attr("data-date-time");
-                else date = e.text();
-                break;
-            }
-        }
-        if (date == null) throw new IllegalStateException("날짜를 찾을 수 없습니다: " + url);
-
-        Element bodyEl = null;
-        String[] bodySelectors = {"#articleBodyContents", "#newsEndContents", "#dic_area", ".newsct_article", ".article_body"};
-        for (String sel : bodySelectors) {
-            bodyEl = doc.selectFirst(sel);
-            if (bodyEl != null) break;
-        }
-        if (bodyEl == null) throw new IllegalStateException("본문 요소를 찾을 수 없습니다: " + url);
-
-        bodyEl.select("script, .ad_banner, .link_news, noscript, div[style]").remove();
-        String content = bodyEl.text().trim();
-
-        String image = null;
-        Element metaImg = doc.selectFirst("meta[property=og:image]");
-        if (metaImg != null && metaImg.hasAttr("content")) {
-            image = metaImg.attr("content");
-        } else {
-            Element imgEl = bodyEl.selectFirst(".end_photo_org img, .nbd_im_w img, img[src]");
-            if (imgEl != null && imgEl.hasAttr("src")) {
-                image = imgEl.absUrl("src");
-            }
-        }
+        // ✨ 4. 본문 내부의 불필요한 요소(이미지 테이블, 기자 정보 등) 제거
+        bodyEl.select("table, .byline").remove();
+        String htmlContent = bodyEl.html()
+            .replaceAll("(<br>\\s*){3,}", "<br><br>") // 연속된 <br> 정리
+            .trim();
 
         return SearchNewsDto.builder()
-            .url(url)
-            .title(title)
-            .date(date)
-            .content(content)
+            .url(finalUrl)
+            .title(unescape(title))
+            .date(parseDateString(date))
+            .content(htmlContent) // HTML 태그가 포함된 본문
             .image(image)
             .build();
+    }
+
+    // --- 헬퍼 메소드들 ---
+
+    private String getMetaTagContent(Document doc, String property) {
+        Element metaTag = doc.selectFirst("meta[property=" + property + "]");
+        return (metaTag != null) ? metaTag.attr("content") : "";
+    }
+
+    private String unescape(String text) {
+        if (text == null) return null;
+        return text.replace("\\\"", "\"").replace("\\'", "'");
+    }
+
+    private String extractPublishedDate(Document doc) {
+        String[] dateSelectors = {"meta[property=article:published_time]", "span.num_date", "span._ARTICLE_DATE_TIME", "span.t11", "span[class*='date']", "time"};
+        for (String selector : dateSelectors) {
+            Element dateElement = doc.selectFirst(selector);
+            if (dateElement != null) {
+                if (dateElement.hasAttr("content")) return dateElement.attr("content");
+                if (dateElement.hasAttr("data-date-time")) return dateElement.attr("data-date-time");
+                return dateElement.text();
+            }
+        }
+        return null;
+    }
+
+    private String parseDateString(String dateString) {
+        if (dateString == null || dateString.isBlank()) return null;
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        List<DateTimeFormatter> formatters = List.of(
+            DateTimeFormatter.RFC_1123_DATE_TIME, DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+            DateTimeFormatter.ofPattern("yyyy. M. d. HH:mm"), DateTimeFormatter.ofPattern("yyyy.MM.dd. a H:mm"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        );
+        for (DateTimeFormatter formatter : formatters) {
+            try {
+                if (dateString.contains("+") || dateString.contains("Z") || dateString.contains("GMT")) {
+                    return ZonedDateTime.parse(dateString, formatter).format(outputFormatter);
+                } else {
+                    return LocalDateTime.parse(dateString, formatter).format(outputFormatter);
+                }
+            } catch (Exception e) { /* 다음 포맷터로 계속 */ }
+        }
+        Pattern pattern = Pattern.compile("\\d{4}[-.]\\d{2}[-.]\\d{2}");
+        java.util.regex.Matcher matcher = pattern.matcher(dateString);
+        if (matcher.find()) {
+            return matcher.group(0).replace(".", "-");
+        }
+        return null;
     }
 
     public List<SearchNewsDto> getNewsByKeyword(String keyword) {
