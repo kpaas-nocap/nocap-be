@@ -12,5 +12,5 @@ public class HistoryDetailDto {
     private String content;
     private String date;
     private String image;
-    private LocalDateTime viewDate;
+    private LocalDateTime createdAt;
 }

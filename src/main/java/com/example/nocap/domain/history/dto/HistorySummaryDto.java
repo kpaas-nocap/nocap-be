@@ -11,6 +11,6 @@ public class HistorySummaryDto {
     private String title;
     private String date;
     private String image;
-    private LocalDateTime viewDate;
+    private LocalDateTime createdAt;
 
 }
