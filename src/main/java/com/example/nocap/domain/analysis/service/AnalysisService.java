@@ -6,6 +6,7 @@ import com.example.nocap.domain.analysis.mapper.AnalysisMapper;
 import com.example.nocap.domain.analysis.dto.AnalysisDto;
 import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.domain.analysis.repository.AnalysisRepository;
+import com.example.nocap.domain.bookmark.repository.BookmarkRepository;
 import com.example.nocap.domain.mainnews.repository.MainNewsRepository;
 import com.example.nocap.domain.user.entity.User;
 import com.example.nocap.domain.user.repository.UserRepository;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -30,6 +32,7 @@ public class AnalysisService {
     private final UserRepository userRepository;
     private final MainNewsRepository mainNewsRepository;
     private final UrlNormalizationService urlNormalizationService;
+    private final BookmarkRepository bookmarkRepository;
 
     private static final Logger log = LoggerFactory.getLogger(AnalysisProcessService.class);
 
@@ -40,10 +43,21 @@ public class AnalysisService {
             .collect(Collectors.toList());
     }
 
-    public AnalysisViewDto getAnalysisById(Long id) {
+    @Transactional
+    public AnalysisViewDto getAnalysisById(Long id, UserDetail userDetail) {
         Analysis analysis = analysisRepository.findById(id)
             .orElseThrow(() -> new CustomException(ErrorCode.ANALYSIS_NOT_FOUND));
-        return analysisMapper.toAnalysisViewDto(analysis);
+
+        boolean isBookmarked = false;
+
+        if (userDetail != null) {
+            User user = userRepository.findById(userDetail.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+            isBookmarked = bookmarkRepository.findByUserAndAnalysis(user, analysis).isPresent();
+        }
+
+        return analysisMapper.toAnalysisViewDto(analysis, isBookmarked);
     }
 
     public List<AnalysisDto> getAnalysisByCategory(String category) {

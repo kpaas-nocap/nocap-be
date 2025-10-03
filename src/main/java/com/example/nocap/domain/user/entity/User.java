@@ -1,5 +1,6 @@
 package com.example.nocap.domain.user.entity;
 
+import com.example.nocap.domain.bookmark.entity.Bookmark;
 import com.example.nocap.domain.useranalysis.entity.UserAnalysis;
 import com.example.nocap.auth.dto.request.SignupRequest;
 import jakarta.persistence.*;
@@ -28,6 +29,10 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAnalysis> userAnalyses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Bookmark> bookmarks = new ArrayList<>();
 
 
     public static User from (SignupRequest dto){

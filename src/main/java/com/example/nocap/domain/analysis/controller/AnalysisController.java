@@ -89,8 +89,10 @@ public class AnalysisController {
         responses = { /* ... */ }
     )
     @GetMapping("/{id}")
-    public ResponseEntity<AnalysisViewDto> getAnalysisById(@PathVariable Long id) {
-        return ResponseEntity.ok(analysisService.getAnalysisById(id));
+    public ResponseEntity<AnalysisViewDto> getAnalysisById(
+        @PathVariable Long id,
+        @AuthenticationPrincipal UserDetail userDetail) {
+        return ResponseEntity.ok(analysisService.getAnalysisById(id, userDetail));
     }
 
     @Operation(

@@ -26,7 +26,8 @@ public interface AnalysisMapper {
     @Mapping(source = "mainNews", target = "mainNewsDto")
     // 3. 자식 리스트를 DTO 리스트로 매핑 (NewsMapper 사용)
     @Mapping(source = "relatedNews", target = "newsComparisonDtos", qualifiedByName = "Sbert")
-    AnalysisViewDto toAnalysisViewDto(Analysis analysis);
+    @Mapping(source = "isBookmarked", target = "isBookmarked")
+    AnalysisViewDto toAnalysisViewDto(Analysis analysis, boolean isBookmarked);
 
     @Mapping(source = "mainNews", target = "mainNewsDto")
     @Mapping(source = "relatedNews", target = "newsComparisonDtos", qualifiedByName = "Sbert")
