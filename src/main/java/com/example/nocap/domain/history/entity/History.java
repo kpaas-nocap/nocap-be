@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Data
@@ -24,8 +25,11 @@ public class History {
     private User user;
 
     private String url;
-
     private String title;
+    private String content;
+    private String date;
+    private String image;
 
-    private LocalDateTime date;
+    @CreationTimestamp // 엔티티 생성 시 자동으로 현재 시간 저장
+    private LocalDateTime createdAt;
 }
