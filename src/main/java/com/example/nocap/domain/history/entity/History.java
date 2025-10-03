@@ -26,6 +26,7 @@ public class History {
 
     private String url;
     private String title;
+    @Column(columnDefinition = "TEXT")
     private String content;
     private String date;
     private String image;
