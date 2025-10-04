@@ -30,6 +30,7 @@ public class SecurityConfig {
         "/auth/kakao/**",
         "/auth/login/kakao",
         "/auth/form/**",
+            "/auth/password/issue-temp",
 
         // API 엔드포인트들
         "/api/nocap/analysis/healthCheck",   // 헬스 체크
@@ -95,7 +96,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(HttpMethod.GET, "/api/nocap/analysis","/api/nocap/comment/get/**", "/auth/password/issue-temp").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/nocap/analysis","/api/nocap/comment/get/**").permitAll()
                         .requestMatchers(ALLOWED_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
