@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth/password")
-public class PasswordController {
+public class PasswordController implements PasswordSwagger{
     private final PasswordService passwordService;
 
     @PostMapping("/issue-temp")
