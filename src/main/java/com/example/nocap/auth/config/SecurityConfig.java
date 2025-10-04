@@ -95,7 +95,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(HttpMethod.GET, "/api/nocap/analysis","/api/nocap/comment/get/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/nocap/analysis","/api/nocap/comment/get/**", "/auth/password/issue-temp").permitAll()
                         .requestMatchers(ALLOWED_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
