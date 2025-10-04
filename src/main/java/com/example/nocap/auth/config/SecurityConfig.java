@@ -30,6 +30,7 @@ public class SecurityConfig {
         "/auth/kakao/**",
         "/auth/login/kakao",
         "/auth/form/**",
+            "/auth/password/issue-temp",
 
         // API 엔드포인트들
         "/api/nocap/analysis/healthCheck",   // 헬스 체크
