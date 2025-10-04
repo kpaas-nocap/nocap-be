@@ -2,7 +2,7 @@ package com.example.nocap.auth.controller;
 
 import com.example.nocap.auth.dto.request.IssueTempPasswordRequest;
 import com.example.nocap.auth.service.PasswordService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +17,7 @@ public class PasswordController {
 
     @PostMapping("/issue-temp")
     public ResponseEntity<Void> issueTemp(@RequestBody IssueTempPasswordRequest req) {
+        System.out.println("req.userId() => " + req.getUserId());
         passwordService.issueTempPasswordByUserId(req.getUserId());
         return ResponseEntity.ok().build();
     }

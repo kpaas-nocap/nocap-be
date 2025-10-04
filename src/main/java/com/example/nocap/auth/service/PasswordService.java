@@ -21,6 +21,7 @@ public class PasswordService {
             u.setUserPw(encoder.encode(temp));
             userRepository.save(u);
             mailService.send(u.getUserId(),"임시 비밀번호.","회원님의 임시 비밀번호는 다음과 같습니다. : "+temp);
+            System.out.println("issued temp => " + temp);
         });
     }
 }
