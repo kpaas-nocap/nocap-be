@@ -6,6 +6,7 @@ import com.example.nocap.domain.analysis.mapper.AnalysisMapper;
 import com.example.nocap.domain.analysis.dto.AnalysisDto;
 import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.domain.analysis.repository.AnalysisRepository;
+import com.example.nocap.domain.mainnews.repository.MainNewsRepository;
 import com.example.nocap.domain.user.entity.User;
 import com.example.nocap.domain.user.repository.UserRepository;
 import com.example.nocap.domain.useranalysis.entity.UserAnalysis;
@@ -14,6 +15,8 @@ import com.example.nocap.exception.ErrorCode;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -25,6 +28,11 @@ public class AnalysisService {
     private final AnalysisRepository analysisRepository;
     private final AnalysisMapper analysisMapper;
     private final UserRepository userRepository;
+    private final MainNewsRepository mainNewsRepository;
+    private final UrlNormalizationService urlNormalizationService;
+
+    private static final Logger log = LoggerFactory.getLogger(AnalysisProcessService.class);
+
 
     public List<AnalysisDto> getAllAnalysis() {
         return analysisRepository.findAll().stream()
@@ -59,4 +67,13 @@ public class AnalysisService {
         analysisRepository.deleteById(id);
     }
 
+    public boolean isAnalyzed(String url) {
+        String normalizedUrl = urlNormalizationService.normalize(url);
+        boolean urlMatched = mainNewsRepository.existsByUrl(url);
+        boolean canonicalUrlMatched = mainNewsRepository.existsByCanonicalUrl(normalizedUrl);
+        log.info("extracted canonical url: " + normalizedUrl);
+        log.info("is matched with url: " + urlMatched );
+        log.info("is matched with canonical url: " + canonicalUrlMatched );
+        return urlMatched || canonicalUrlMatched;
+    }
 }

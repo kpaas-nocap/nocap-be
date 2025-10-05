@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -18,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -30,11 +32,11 @@ public class SecurityConfig {
         "/auth/form/**",
 
         // API 엔드포인트들
-        "/api/nocap/analysis",               // 전체 분석 목록 조회 (GET), 새 분석 요청 (POST)
         "/api/nocap/analysis/healthCheck",   // 헬스 체크
         "/api/nocap/analysis/{id:\\d+}",     // 특정 분석 조회
         "/api/nocap/analysis/keyword/{keyword}", // 키워드별 분석 조회
         "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
+        "/api/nocap/analysis/check", // 분석 여부 조회
         "/api/nocap/search/**",              // 뉴스 검색 관련 모든 경로 (category, keyword 포함)
         "/api/nocap/popnews",                // 인기 뉴스
 
@@ -93,6 +95,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(HttpMethod.GET, "/api/nocap/analysis","/api/nocap/comment/get/**").permitAll()
                         .requestMatchers(ALLOWED_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
