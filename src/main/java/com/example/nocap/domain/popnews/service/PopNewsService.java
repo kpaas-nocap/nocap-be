@@ -1,7 +1,9 @@
 package com.example.nocap.domain.popnews.service;
 
 import com.example.nocap.domain.analysis.service.ArticleExtractionService;
+import com.example.nocap.domain.popnews.dto.PopNewsDetailDto;
 import com.example.nocap.domain.popnews.dto.PopNewsDto;
+import com.example.nocap.domain.popnews.dto.PopNewsSummaryDto;
 import com.example.nocap.domain.popnews.entity.PopNews;
 import com.example.nocap.domain.popnews.mapper.PopNewsMapper;
 import com.example.nocap.domain.popnews.repository.PopNewsRepository;
@@ -107,7 +109,13 @@ public class PopNewsService {
         }
     }
 
-    public List<PopNewsDto> getPopNews() {
-        return popNewsMapper.toPopNewsDtoList(popNewsRepository.findAll());
+    public List<PopNewsSummaryDto> getAllPopNews() {
+        return popNewsMapper.toPopNewsSummaryDtoList(popNewsRepository.findAll());
+    }
+
+    public PopNewsDetailDto getPopNews(Long popNewsId) {
+        PopNews popNews = popNewsRepository.findById(popNewsId)
+            .orElseThrow(() -> new CustomException(ErrorCode.POP_NEWS_NOT_FOUND));
+        return popNewsMapper.toPopNewsDetailDto(popNews);
     }
 }

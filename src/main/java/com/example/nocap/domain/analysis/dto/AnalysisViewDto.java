@@ -19,4 +19,6 @@ public class AnalysisViewDto {
     private MainNewsResponseDto mainNewsDto;
     private List<NewsComparisonDto> newsComparisonDtos;
 
+    private boolean isBookmarked;
+
 }
