@@ -37,7 +37,8 @@ public class PopNewsService {
 
 
     @Transactional
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Scheduled(cron = "0 0 * * * ?") // 정각마다
+    // @Scheduled(cron = "0 * * * * ?") // 분단위 테스트용
     public void requestPopNews() {
         System.out.println("인기뉴스 크롤링이 수행됩니다.");
 

@@ -7,6 +7,7 @@ import com.example.nocap.domain.analysis.dto.AnalysisViewDto;
 import com.example.nocap.domain.analysis.dto.SbertResponseDto;
 import com.example.nocap.domain.analysis.service.AnalysisProcessService;
 import com.example.nocap.domain.analysis.service.AnalysisService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Analysis", description = "분석 관련 API")
@@ -52,17 +54,20 @@ public class AnalysisController {
     }
 
     @Operation(
-        summary = "Analysis 수행",
-        description = "사용자의 id와 분석할 기사의 url을 통해 분석을 수행.",
+        summary = "분석 수행",
+        description = "사용자의 id와 분석할 기사를통해 분석을 수행.",
         parameters = { @Parameter(name = "userId", description = "사용자 ID", required = true, example = "1"),
-                       @Parameter(name = "url", description = "분석할 뉴스 URL", required = true, example = "https://n.news.naver.com/article/366/0001111339?cds=news_media_pc")},
+                       @Parameter(name = "SearchNewsDto", description = "분석할 뉴스", required = true, example = "")},
         responses = { /* ... */ }
     )
     @PostMapping
-    public ResponseEntity<SbertResponseDto> analysis (@RequestBody AnalysisRequestDto analysisRequestDto) {
+    public ResponseEntity<SbertResponseDto> analysis (
+        @RequestBody AnalysisRequestDto analysisRequestDto,
+        @AuthenticationPrincipal UserDetail userDetail)
+        throws JsonProcessingException {
 
         SbertResponseDto sbertRequestDto = analysisProcessService.analyzeUrlAndPrepareRequest(
-            analysisRequestDto);
+            analysisRequestDto, userDetail);
 
         return ResponseEntity.ok(sbertRequestDto);
     }
@@ -119,5 +124,16 @@ public class AnalysisController {
     public ResponseEntity<Void> deleteAnalysisById(@PathVariable Long id) {
         analysisService.deleteAnalysisById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+        summary = "분석 이력 확인",
+        description = "입력한 url과 메인뉴스의 canonicalUrl을 비교하여 분석 이력 확인",
+        parameters = { @Parameter(name = "id", description = "분석 ID", required = true, example = "1"),},
+        responses = { /* ... */ }
+    )
+    @GetMapping("/check")
+    public ResponseEntity<Boolean> isAnalyzed(@RequestParam("url") String url) {
+        return ResponseEntity.ok(analysisService.isAnalyzed(url));
     }
 }
