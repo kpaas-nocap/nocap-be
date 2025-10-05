@@ -25,6 +25,8 @@ public enum ErrorCode {
     POP_NEWS_NOT_FOUND(HttpStatus.NOT_FOUND, "인기뉴스를 찾을 수 없습니다."),
     HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "검색기록을 찾을 수 없습니다."),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 댓글을 찾을 수 없습니다."),
+    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "문의사항을 찾을 수 없습니다."),
+
 
     // 409 Conflict: 충돌
     DUPLICATE_MEMBER_EMAIL(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
