@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
 public enum QuestionCategory {
     INQUIRY("이용문의"),
     ACCOUNT("계정·회원"),
@@ -15,4 +14,8 @@ public enum QuestionCategory {
     ETC("기타문의");
 
     private final String title;
+
+    QuestionCategory(String title){
+        this.title = title;
+    }
 }
