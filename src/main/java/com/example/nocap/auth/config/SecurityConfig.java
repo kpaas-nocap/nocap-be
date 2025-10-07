@@ -30,6 +30,7 @@ public class SecurityConfig {
         "/auth/kakao/**",
         "/auth/login/kakao",
         "/auth/form/**",
+            "/auth/password/issue-temp",
 
         // API 엔드포인트들
         "/api/nocap/analysis/healthCheck",   // 헬스 체크
@@ -38,7 +39,8 @@ public class SecurityConfig {
         "/api/nocap/analysis/category/{category}", // 카테고리별 분석 조회
         "/api/nocap/analysis/check", // 분석 여부 조회
         "/api/nocap/search/**",              // 뉴스 검색 관련 모든 경로 (category, keyword 포함)
-        "/api/nocap/popnews",                // 인기 뉴스
+        "/api/nocap/popnews",                // 인기 뉴스 전체 조회
+        "/api/nocap/popnews/**",             // 인기 뉴스
 
         // Swagger 문서
         "/swagger-ui/**",
@@ -97,6 +99,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(HttpMethod.GET, "/api/nocap/analysis","/api/nocap/comment/get/**").permitAll()
                         .requestMatchers(ALLOWED_URLS).permitAll()
+                        .requestMatchers("/api/nocap/question/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint()))
