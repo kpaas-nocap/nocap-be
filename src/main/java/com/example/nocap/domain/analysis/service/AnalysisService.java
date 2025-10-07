@@ -37,6 +37,7 @@ public class AnalysisService {
     private static final Logger log = LoggerFactory.getLogger(AnalysisProcessService.class);
 
 
+    @Transactional(readOnly = true)
     public List<AnalysisDto> getAllAnalysis() {
         return analysisRepository.findAll().stream()
             .map(analysisMapper::toAnalysisDto)
@@ -60,12 +61,14 @@ public class AnalysisService {
         return analysisMapper.toAnalysisViewDto(analysis, isBookmarked);
     }
 
+    @Transactional(readOnly = true)
     public List<AnalysisDto> getAnalysisByCategory(String category) {
         return analysisRepository.findAllByCategory(category).stream()
             .map(analysisMapper::toAnalysisDto)
             .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<AnalysisDto> getAnalysisByUserId(UserDetail userDetail) {
 
         User user = userRepository.findById(userDetail.getId())
@@ -77,6 +80,7 @@ public class AnalysisService {
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public void deleteAnalysisById(Long id) {
         analysisRepository.deleteById(id);
     }
