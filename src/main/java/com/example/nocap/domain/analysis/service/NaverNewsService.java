@@ -132,7 +132,7 @@ public class NaverNewsService {
             item.getTitle().equals(excludeTitle) || item.getOriginallink().equals(excludeUrl)
         );
 
-        // 3. 중복 제거된 게 없고, 11개 이상일 때 마지막 하나만 제거
+        // 3. 중복 제거된 게 없고, 6개 이상일 때 마지막 하나만 제거
         if (!removed && items.size() > 5) {
             items.remove(items.size() - 1);
         }
