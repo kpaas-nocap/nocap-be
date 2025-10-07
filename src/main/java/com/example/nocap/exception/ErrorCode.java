@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Getter
-@RequiredArgsConstructor
 public enum ErrorCode {
 
     // 400 Bad Request: 잘못된 요청
@@ -39,8 +38,11 @@ public enum ErrorCode {
     LAMBDA_REQUEST_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "람다 호출 중 오류가 발생했습니다."),
     OPENAI_CREDIT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI의 크레딧이 부족하여 오류가 발생했습니다.");
 
-
-
     private final HttpStatus status;       // HTTP 상태 코드
     private final String message;        // 에러 메시지
+
+    ErrorCode(HttpStatus status , String message){
+        this.status = status;
+        this.message = message;
+    }
 }
