@@ -4,8 +4,12 @@ import com.example.nocap.domain.analysis.dto.CrawledResponseDto;
 import com.example.nocap.domain.analysis.dto.NewsSearchResponseDto;
 import com.example.nocap.domain.news.dto.NewsRequestDto;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,7 +25,7 @@ public class CrawlingService {
 
         for (NewsSearchResponseDto.Item item : newsSearchResponseDto.getItems()) {
             String url = item.getLink();
-            String fullHtmlContent;
+            String plainContent;
 
             try {
                 Document doc = Jsoup.connect(url)
@@ -32,14 +36,14 @@ public class CrawlingService {
 
                 // 네이버 뉴스인지 확인하고 적절한 크롤링 수행
                 if (url.contains("news.naver.com")) {
-                    fullHtmlContent = extractNaverNewsContent(doc);
+                    plainContent = extractNaverNewsContent(doc);
                 } else {
                     // 일반 뉴스 사이트
                     Element bodyEl = doc.selectFirst("article");
                     if (bodyEl == null) {
                         bodyEl = doc.body();
                     }
-                    fullHtmlContent = bodyEl.html();
+                    plainContent = bodyEl.text();
                 }
 
             } catch (IOException e) {
@@ -47,14 +51,17 @@ public class CrawlingService {
                 continue;
             }
 
-            if (fullHtmlContent != null && !fullHtmlContent.trim().isEmpty()) {
+            if (plainContent != null && !plainContent.trim().isEmpty()) {
+                plainContent = plainContent.replace("\\", "");
+                plainContent = plainContent.replaceAll("\\s+", " ").trim();
+
                 crawledNews.add(new NewsRequestDto(
                     // 크롤링은 NaverNew에서 가공된 버젼을 사용하되
                     // 차후 뉴스 상세페이지 및 분석 여부 판단을 위해 원본 링크로 저장
                     item.getOriginallink(), // 크롤링은 NaverNew에서 가공된 버젼을 사용하되
                     cleanTitle(item.getTitle()),
-                    item.getPubDate(),
-                    fullHtmlContent // HTML이 포함된 본문 전달
+                    parseDateString(item.getPubDate()),
+                    plainContent
                 ));
                 log.debug("뉴스 크롤링 성공: {}", url);
             }
@@ -79,6 +86,7 @@ public class CrawlingService {
         for (String selector : contentSelectors) {
             contentArea = doc.selectFirst(selector);
             if (contentArea != null) {
+                cleanArticleBody(contentArea);
                 break; // 가장 먼저 찾아지는 요소를 본문으로 간주
             }
         }
@@ -92,13 +100,8 @@ public class CrawlingService {
         contentArea.select("script, style, .end_photo_org, .img_desc, .vod_player, .ad, " +
             ".byline, .copyright, [class*='social'], [id*='social']").remove();
 
-        // HTML 구조를 유지한 본문 추출
-        String htmlContent = contentArea.html();
-
         // 연속된 <br> 태그 정리 및 앞뒤 공백 제거
-        return htmlContent
-            .replaceAll("(<br\\s*/?\\s*>\\s*){3,}", "<br><br>") // <br>이 3개 이상 연속되면 2개로 줄임
-            .trim();
+        return contentArea.text();
     }
 
     private String cleanTitle(String title) {
@@ -111,5 +114,40 @@ public class CrawlingService {
             .replaceAll("&lt;", "<")
             .replaceAll("&gt;", ">")
             .trim();
+    }
+
+    private void cleanArticleBody(Element bodyElement) {
+        bodyElement.select(".byline, [class*='reporter'], .copyright, [class*='related-article'], .utility").remove();
+
+        bodyElement.select("span[name=stock]").unwrap();
+    }
+
+    private String parseDateString(String dateString) {
+        if (dateString == null || dateString.isBlank()) {
+            return null;
+        }
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        List<DateTimeFormatter> formatters = List.of(
+            DateTimeFormatter.RFC_1123_DATE_TIME,
+            DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+            DateTimeFormatter.ofPattern("yyyy. M. d. HH:mm"),
+            DateTimeFormatter.ofPattern("yyyy.MM.dd. a H:mm"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        );
+        for (DateTimeFormatter formatter : formatters) {
+            try {
+                if (dateString.contains("+") || dateString.contains("Z") || dateString.contains("GMT")) {
+                    return ZonedDateTime.parse(dateString, formatter).format(outputFormatter);
+                } else {
+                    return LocalDateTime.parse(dateString, formatter).format(outputFormatter);
+                }
+            } catch (Exception e) { /* 다음 포맷터로 계속 */ }
+        }
+        Pattern pattern = Pattern.compile("\\d{4}[-.]\\d{2}[-.]\\d{2}");
+        java.util.regex.Matcher matcher = pattern.matcher(dateString);
+        if (matcher.find()) {
+            return matcher.group(0).replace(".", "-");
+        }
+        return null;
     }
 }
