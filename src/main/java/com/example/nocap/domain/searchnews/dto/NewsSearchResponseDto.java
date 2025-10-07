@@ -13,6 +13,7 @@ public class NewsSearchResponseDto {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Item {
         private String title;
+        private String link;
         private String originallink;
         private String pubDate;
     }
