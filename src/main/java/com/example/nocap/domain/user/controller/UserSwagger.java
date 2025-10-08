@@ -1,12 +1,14 @@
 package com.example.nocap.domain.user.controller;
 
 import com.example.nocap.domain.user.dto.request.ChangepasswordRequest;
+import com.example.nocap.domain.user.dto.request.UserUpdateRequest;
 import com.example.nocap.domain.user.dto.response.UserDto;
 import com.example.nocap.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -77,4 +79,33 @@ public interface UserSwagger {
             }
     )
     ResponseEntity<String> changePassword(ChangepasswordRequest request);
+    @Operation(
+            summary = "회원정보 수정 (비밀번호 제외)",
+            description = "현재 로그인 사용자의 userId, username을 수정. 토큰 필요~",
+            requestBody = @RequestBody(
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = UserUpdateRequest.class),
+                            examples = @ExampleObject(value = "{\n  \"userId\": \"new@example.com\",\n  \"username\": \"New Name\"\n}")
+                    )
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "수정 성공",
+                            content = @Content(schema = @Schema(implementation = UserDto.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "인증 필요",
+                            content = @Content(schema = @Schema(implementation = ErrorCode.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "중복된 userId 또는 username",
+                            content = @Content(schema = @Schema(implementation = ErrorCode.class))
+                    )
+            }
+    )
+    ResponseEntity<UserDto> updateProfile(UserUpdateRequest request);
 }
