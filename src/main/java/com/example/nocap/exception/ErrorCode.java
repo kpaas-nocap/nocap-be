@@ -12,10 +12,14 @@ public enum ErrorCode {
     EMPTY_INPUT(HttpStatus.BAD_REQUEST, "검색어가 입력되지 않았습니다."),
     NO_POINT(HttpStatus.BAD_REQUEST, "포인트가 부족합니다."),
     ALREADY_ANALYZED_NEWS(HttpStatus.BAD_REQUEST, "이미 분석된 뉴스입니다."),
+    INVALID_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "현재 비밀번호가 올바르지 않습니다."),
 
     // 401 Unauthorized: 인증되지 않은 사용자
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요한 요청입니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+
+    //403 Forbidden
+    FORBIDDEN_PASSWORD_CHANGE(HttpStatus.FORBIDDEN, "비밀번호 변경은 FORM로그인 사용자만 가능합니다."),
 
     // 404 Not Found: 리소스를 찾을 수 없음
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자를 찾을 수 없습니다."),
