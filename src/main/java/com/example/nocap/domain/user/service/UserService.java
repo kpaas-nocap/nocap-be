@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -72,5 +73,12 @@ public class UserService {
                 .role(user.getRole())
                 .userType(user.getUserType())
                 .build();
+    }
+    @Transactional
+    public void deleteMe(){
+        Long id = AuthContext.currentUserPk();
+        if(id == null) throw new CustomException(ErrorCode.UNAUTHORIZED);
+        User user = userRepository.findById(id).orElseThrow(()->new CustomException(ErrorCode.UNAUTHORIZED));
+        userRepository.delete(user);
     }
 }
