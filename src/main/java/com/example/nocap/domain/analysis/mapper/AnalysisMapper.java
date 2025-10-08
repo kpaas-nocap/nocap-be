@@ -4,12 +4,13 @@ import com.example.nocap.domain.analysis.dto.AnalysisDto;
 import com.example.nocap.domain.analysis.dto.AnalysisViewDto;
 import com.example.nocap.domain.analysis.dto.SbertResponseDto;
 import com.example.nocap.domain.analysis.entity.Analysis;
+import com.example.nocap.domain.comment.mapper.CommentMapper;
 import com.example.nocap.domain.mainnews.mapper.MainNewsMapper;
 import com.example.nocap.domain.news.mapper.NewsMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {MainNewsMapper.class, NewsMapper.class})
+@Mapper(componentModel = "spring", uses = {MainNewsMapper.class, NewsMapper.class, CommentMapper.class})
 public interface AnalysisMapper {
 
     // Analysis -> AnalysisDto
@@ -23,6 +24,7 @@ public interface AnalysisMapper {
     @Mapping(source = "analysis.mainNews", target = "mainNewsDto")
     @Mapping(source = "analysis.relatedNews", target = "newsComparisonDtos", qualifiedByName = "Sbert")
     @Mapping(source = "isBookmarked", target = "bookmarked")
+    @Mapping(source = "analysis.comments", target = "comments")
     AnalysisViewDto toAnalysisViewDto(Analysis analysis, boolean isBookmarked);
 
     // Analysis -> SbertResponseDto
