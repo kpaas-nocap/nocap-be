@@ -36,7 +36,8 @@ public class Analysis {
     private LocalDateTime date;
   
     @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL)
-    private List<Comment> comments;
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL)
     private List<News> relatedNews;
