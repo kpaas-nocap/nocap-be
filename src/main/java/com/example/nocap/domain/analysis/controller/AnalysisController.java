@@ -61,15 +61,12 @@ public class AnalysisController {
         responses = { /* ... */ }
     )
     @PostMapping
-    public ResponseEntity<SbertResponseDto> analysis (
+    public ResponseEntity<AnalysisViewDto> analysis (
         @RequestBody AnalysisRequestDto analysisRequestDto,
         @AuthenticationPrincipal UserDetail userDetail)
         throws JsonProcessingException {
-
-        SbertResponseDto sbertRequestDto = analysisProcessService.analyzeUrlAndPrepareRequest(
-            analysisRequestDto, userDetail);
-
-        return ResponseEntity.ok(sbertRequestDto);
+        return ResponseEntity.ok(analysisProcessService.analyzeUrlAndPrepareRequest(
+            analysisRequestDto, userDetail));
     }
 
     @Operation(

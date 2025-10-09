@@ -2,6 +2,7 @@ package com.example.nocap.domain.analysis.service;
 
 import com.example.nocap.auth.dto.response.UserDetail;
 import com.example.nocap.domain.analysis.dto.AnalysisRequestDto;
+import com.example.nocap.domain.analysis.dto.AnalysisViewDto;
 import com.example.nocap.domain.analysis.dto.CrawledResponseDto;
 import com.example.nocap.domain.analysis.dto.NewsSearchRequestDto;
 import com.example.nocap.domain.analysis.dto.NewsSearchResponseDto;
@@ -68,7 +69,7 @@ public class AnalysisProcessService {
     }
 
     @Transactional
-    public SbertResponseDto analyzeUrlAndPrepareRequest(AnalysisRequestDto analysisRequestDto, UserDetail userDetail)
+    public AnalysisViewDto analyzeUrlAndPrepareRequest(AnalysisRequestDto analysisRequestDto, UserDetail userDetail)
         throws JsonProcessingException {
 
         // 메인뉴스를 구성하기 위해 요청된 뉴스를 객체에 담음
@@ -139,9 +140,10 @@ public class AnalysisProcessService {
         // 6. FastAPI 호출
         SbertResponseDto sbertResponseDto = requestFastAPi(sbertRequestDto);
         assert sbertResponseDto != null;
-        analysisSaveService.saveAnalysisData(userId, plan, mainNews,
+        Analysis analysis = analysisSaveService.saveAnalysisData(userId, plan, mainNews,
             sbertResponseDto);
-        return sbertResponseDto;
+
+        return analysisMapper.toAnalysisViewDto(analysis, false);
     }
 
     private SbertResponseDto requestFastAPi(SbertRequestDto sbertRequestDto) {

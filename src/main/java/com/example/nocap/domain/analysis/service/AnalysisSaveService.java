@@ -1,5 +1,6 @@
 package com.example.nocap.domain.analysis.service;
 
+import com.example.nocap.domain.analysis.dto.AnalysisViewDto;
 import com.example.nocap.domain.analysis.dto.SbertResponseDto;
 import com.example.nocap.domain.analysis.dto.SbertResponseDto.NewsComparisonDto;
 import com.example.nocap.domain.analysis.entity.Analysis;
@@ -32,7 +33,7 @@ public class AnalysisSaveService {
     private final NewsMapper newsMapper;
 
     @Transactional
-    public void saveAnalysisData(Long userId, String plan, MainNews mainNews, SbertResponseDto sbertResponseDto) {
+    public Analysis saveAnalysisData(Long userId, String plan, MainNews mainNews, SbertResponseDto sbertResponseDto) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -61,5 +62,7 @@ public class AnalysisSaveService {
             .build();
 
         userAnalysisRepository.save(userAnalysisLink);
+
+        return savedAnalysis;
     }
 }
