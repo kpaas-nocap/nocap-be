@@ -4,12 +4,14 @@ import com.example.nocap.domain.user.dto.request.ChangepasswordRequest;
 import com.example.nocap.domain.user.dto.request.UserUpdateRequest;
 import com.example.nocap.domain.user.dto.response.UserDto;
 import com.example.nocap.exception.ErrorCode;
+import com.example.nocap.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 
@@ -108,4 +110,25 @@ public interface UserSwagger {
             }
     )
     ResponseEntity<UserDto> updateProfile(UserUpdateRequest request);
+
+    @Operation(
+            summary = "회원 탈퇴",
+            description = "휘원 정보 삭제. 토큰만 쏘면 된 다.",
+            security = @SecurityRequirement(name = "bearerAuth"),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "탈퇴 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "인증 실패",
+                            content = @Content(
+                                    schema = @Schema(implementation = ErrorResponse.class),
+                                    examples = @ExampleObject(value = "{\n  \"status\": 401,\n  \"message\": \"인증이 필요한 요청입니다.\"\n}")
+                            )
+                    )
+            }
+    )
+    ResponseEntity<String> deleteMe();
 }
