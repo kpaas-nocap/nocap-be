@@ -1,6 +1,7 @@
 package com.example.nocap.domain.analysis.dto;
 
 import com.example.nocap.domain.analysis.dto.SbertResponseDto.NewsComparisonDto;
+import com.example.nocap.domain.comment.dto.CommentResponseDto;
 import com.example.nocap.domain.mainnews.dto.MainNewsRequestDto;
 import com.example.nocap.domain.mainnews.dto.MainNewsResponseDto;
 import java.time.LocalDateTime;
@@ -20,5 +21,7 @@ public class AnalysisViewDto {
     private List<NewsComparisonDto> newsComparisonDtos;
 
     private boolean isBookmarked;
+
+    private List<CommentResponseDto> comments;
 
 }

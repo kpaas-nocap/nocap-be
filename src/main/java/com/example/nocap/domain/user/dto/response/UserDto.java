@@ -1,4 +1,4 @@
-package com.example.nocap.domain.user.dto;
+package com.example.nocap.domain.user.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -12,4 +12,5 @@ public class UserDto {
     private String userId;
     private String username;
     private String role;
+    private String userType;
 }

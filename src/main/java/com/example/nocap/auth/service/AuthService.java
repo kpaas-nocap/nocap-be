@@ -63,6 +63,7 @@ public class AuthService {
                 .username(signupRequest.getNickname())
                 .userPw(passwordEncoder.encode(UUID.randomUUID().toString()))
                 .role("USER")
+                .userType("KAKAO")
                 .build();
 
         userRepository.save(newUser);
@@ -80,6 +81,7 @@ public class AuthService {
                 .username(req.getUsername())
                 .userPw(passwordEncoder.encode(req.getPassword()))
                 .role("USER")
+                .userType("FORM")
                 .build();
         userRepository.save(newUser);
         String token = jwtUtil.createJwt(newUser, 60 * 60 * 1000L);

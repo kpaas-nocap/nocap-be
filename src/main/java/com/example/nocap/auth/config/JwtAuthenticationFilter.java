@@ -9,7 +9,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Arrays;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,10 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
@@ -34,54 +32,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String requestURI = request.getRequestURI();
-        if (Arrays.stream(SecurityConfig.ALLOWED_URLS).anyMatch(url -> new AntPathMatcher().match(url, requestURI))) {
-            filterChain.doFilter(request,response);
-            return;
+        // 1. 헤더에서 토큰을 가져옴 (없으면 null)
+        String token = jwtUtil.resolveToken(request);
+
+        // 2. 토큰이 존재하고 유효한 경우에만 인증 처리
+        if (StringUtils.hasText(token) && !tokenBlacklist.isBlacklisted(token)) {
+            try {
+                if (!jwtUtil.isExpired(token)) {
+                    String userId = jwtUtil.getUserId(token);
+                    User user = userRepository.findByUserId(userId).orElse(null);
+
+                    if (user != null) {
+                        // isTmp 토큰이 아닌 경우에만 최종 인증 처리
+                        boolean isTmp = jwtUtil.isTmp(token);
+                        if (!isTmp) {
+                            UserDetail userDetails = new UserDetail(user);
+                            Authentication authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                            SecurityContextHolder.getContext().setAuthentication(authToken);
+                        }
+                    }
+                }
+            } catch (JwtException | IllegalArgumentException e) {
+                // 토큰 파싱/검증 과정에서 오류가 발생해도 무시하고 다음 필터로 진행
+                log.error("Invalid JWT Token: {}", e.getMessage());
+            }
         }
 
-        String authorization = request.getHeader("Authorization");
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        String token = authorization.substring(7);
-
-        if (tokenBlacklist.isBlacklisted(token)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        try {
-            if (jwtUtil.isExpired(token)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            String userId = jwtUtil.getUserId(token);
-            if (userId == null) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            User user = userRepository.findByUserId(userId).orElse(null);
-            if (user == null) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            boolean isTmp = jwtUtil.isTmp(token);
-            if (!isTmp) {
-                UserDetail userDetails = new UserDetail(user);
-                Authentication authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
-        } catch (JwtException | IllegalArgumentException e) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
+        // 3. 토큰이 없거나 유효하지 않더라도, 예외를 던지지 않고 항상 다음 필터로 진행
         filterChain.doFilter(request, response);
     }
 }
