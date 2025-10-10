@@ -29,7 +29,7 @@ public class UserController implements UserSwagger{
         return ResponseEntity.ok(userService.updateProfile(request));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/delete")
     public ResponseEntity<String> deleteMe(){
         userService.deleteMe();
         return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
