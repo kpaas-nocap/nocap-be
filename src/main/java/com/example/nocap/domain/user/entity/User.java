@@ -26,7 +26,9 @@ public class User {
     private String userPw;
     private String username;
     private String role;
+    private String userType;
     private int point;
+
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAnalysis> userAnalyses = new ArrayList<>();
