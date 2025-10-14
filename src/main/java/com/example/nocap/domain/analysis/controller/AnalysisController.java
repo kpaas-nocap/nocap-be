@@ -4,7 +4,7 @@ import com.example.nocap.auth.dto.response.UserDetail;
 import com.example.nocap.domain.analysis.dto.AnalysisDto;
 import com.example.nocap.domain.analysis.dto.AnalysisRequestDto;
 import com.example.nocap.domain.analysis.dto.AnalysisViewDto;
-import com.example.nocap.domain.analysis.dto.SbertResponseDto;
+import com.example.nocap.domain.analysis.dto.IsAnalyzedDto;
 import com.example.nocap.domain.analysis.service.AnalysisProcessService;
 import com.example.nocap.domain.analysis.service.AnalysisService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -132,7 +131,7 @@ public class AnalysisController {
         responses = { /* ... */ }
     )
     @GetMapping("/check")
-    public ResponseEntity<Boolean> isAnalyzed(@RequestParam("url") String url) {
+    public ResponseEntity<IsAnalyzedDto> isAnalyzed(@RequestParam("url") String url) {
         return ResponseEntity.ok(analysisService.isAnalyzed(url));
     }
 }
