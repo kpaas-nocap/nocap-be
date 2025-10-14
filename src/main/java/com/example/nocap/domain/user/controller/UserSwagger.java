@@ -43,71 +43,15 @@ public interface UserSwagger {
     ResponseEntity<UserDto> getCurrentUser();
 
     @Operation(
-            summary = "비밀번호 변경",
-            description = "현재 로그인된 사용자의 비밀번호 변경. 카카오 로그인 사용자는 변경 X" +
-                    "토큰 필요~",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "204",
-                            description = "비밀번호 변경 성공",
-                            content = @Content(
-                                    examples = @ExampleObject(value = "비밀번호가 성공적으로 변경되었습니다.")
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "현재 비밀번호가 올바르지 않음",
-                            content = @Content(
-                                    schema = @Schema(implementation = ErrorCode.class),
-                                    examples = @ExampleObject(value = "{\n  \"status\": 400,\n  \"message\": \"현재 비밀번호가 올바르지 않습니다.\"\n}")
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "403",
-                            description = "비밀번호 변경 권한 없음 (FORM 사용자가 아님)",
-                            content = @Content(
-                                    schema = @Schema(implementation = ErrorCode.class),
-                                    examples = @ExampleObject(value = "{\n  \"status\": 403,\n  \"message\": \"비밀번호 변경은 FORM 사용자만 가능합니다.\"\n}")
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "인증되지 않은 사용자 (로그인 필요)",
-                            content = @Content(
-                                    schema = @Schema(implementation = ErrorCode.class),
-                                    examples = @ExampleObject(value = "{\n  \"status\": 401,\n  \"message\": \"인증이 필요한 요청입니다.\"\n}")
-                            )
-                    )
-            }
-    )
-    ResponseEntity<String> changePassword(ChangepasswordRequest request);
-    @Operation(
-            summary = "회원정보 수정 (비밀번호 제외)",
-            description = "현재 로그인 사용자의 userId, username을 수정. 토큰 필요~",
+            summary = "회원정보/비밀번호 수정 토큰 필요함" ,
+            description = "userId, username, currentPassword, newPassword 중 제공된 필드만 반영",
             requestBody = @RequestBody(
                     required = true,
                     content = @Content(
                             schema = @Schema(implementation = UserUpdateRequest.class),
-                            examples = @ExampleObject(value = "{\n  \"userId\": \"new@example.com\",\n  \"username\": \"New Name\"\n}")
+                            examples = @ExampleObject(value = "{\n  \"userId\": \"new@example.com\",\n  \"username\": \"New Name\",\n  \"currentPassword\": \"old\",\n  \"newPassword\": \"new\"\n}")
                     )
-            ),
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "수정 성공",
-                            content = @Content(schema = @Schema(implementation = UserDto.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "인증 필요",
-                            content = @Content(schema = @Schema(implementation = ErrorCode.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "409",
-                            description = "중복된 userId 또는 username",
-                            content = @Content(schema = @Schema(implementation = ErrorCode.class))
-                    )
-            }
+            )
     )
     ResponseEntity<UserDto> updateProfile(UserUpdateRequest request);
 

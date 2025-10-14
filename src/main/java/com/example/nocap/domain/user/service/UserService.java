@@ -42,30 +42,34 @@ public class UserService {
                 .build();
     }
 
-    public void changePassword(ChangepasswordRequest req){
+    @Transactional
+    public UserDto update(UserUpdateRequest req) {
         Long id = AuthContext.currentUserPk();
-        if(id == null)throw new CustomException(ErrorCode.UNAUTHORIZED);
-        User user = userRepository.findById(id).orElseThrow(()->new CustomException(ErrorCode.UNAUTHORIZED));
-        if(!"FORM".equalsIgnoreCase(user.getUserType()))throw new CustomException(ErrorCode.FORBIDDEN_PASSWORD_CHANGE);
-        if(!passwordEncoder.matches(req.getCurrentPassword(),user.getUserPw()))throw new CustomException(ErrorCode.INVALID_CURRENT_PASSWORD);
-        user.setUserPw(passwordEncoder.encode(req.getNewPassword()));
-        userRepository.save(user);
-    }
-
-    public UserDto updateProfile(UserUpdateRequest req){
-        Long id = AuthContext.currentUserPk();
-        if(id==null) throw new CustomException(ErrorCode.UNAUTHORIZED);
+        if (id == null) throw new CustomException(ErrorCode.UNAUTHORIZED);
         User user = userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED));
-        if (req.getUserId() != null && !req.getUserId().equals(user.getUserId())) {
-            if (userRepository.existsByUserId(req.getUserId())) throw new CustomException(ErrorCode.DUPLICATE_USER_ID);
-            user.setUserId(req.getUserId());
+
+        boolean wantsPasswordChange = notBlank(req.getCurrentPassword()) && notBlank(req.getNewPassword());
+        boolean wantsProfileUpdate = req.getUserId() != null || req.getUsername() != null;
+
+        if (wantsPasswordChange) {
+            if (!"FORM".equalsIgnoreCase(user.getUserType())) throw new CustomException(ErrorCode.FORBIDDEN_PASSWORD_CHANGE);
+            if (!passwordEncoder.matches(req.getCurrentPassword(), user.getUserPw())) throw new CustomException(ErrorCode.INVALID_CURRENT_PASSWORD);
+            user.setUserPw(passwordEncoder.encode(req.getNewPassword()));
         }
-        if (req.getUsername() != null && !req.getUsername().equals(user.getUsername())) {
-            if (userRepository.existsByUsername(req.getUsername())) throw new CustomException(ErrorCode.DUPLICATE_USERNAME);
-            user.setUsername(req.getUsername());
+
+        if (wantsProfileUpdate) {
+            if (req.getUserId() != null && !req.getUserId().equals(user.getUserId())) {
+                if (userRepository.existsByUserId(req.getUserId())) throw new CustomException(ErrorCode.DUPLICATE_USER_ID);
+                user.setUserId(req.getUserId());
+            }
+            if (req.getUsername() != null && !req.getUsername().equals(user.getUsername())) {
+                if (userRepository.existsByUsername(req.getUsername())) throw new CustomException(ErrorCode.DUPLICATE_USERNAME);
+                user.setUsername(req.getUsername());
+            }
         }
 
         userRepository.save(user);
+
         return UserDto.builder()
                 .Id(user.getId())
                 .userId(user.getUserId())
@@ -74,6 +78,11 @@ public class UserService {
                 .userType(user.getUserType())
                 .build();
     }
+
+    private boolean notBlank(String s) {
+        return s != null && !s.trim().isEmpty();
+    }
+
     @Transactional
     public void deleteMe(){
         Long id = AuthContext.currentUserPk();

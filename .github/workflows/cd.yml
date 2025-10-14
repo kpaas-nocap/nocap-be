@@ -34,6 +34,7 @@ jobs:
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           FASTAPI_SERVER_URL: ${{ secrets.FASTAPI_SERVER_URL }}
+          FASTAPI_API_KEY: ${{secrets.FASTAPI_API_KEY}}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
         run: |
@@ -49,6 +50,7 @@ jobs:
             --from-literal=MAIL_USERNAME="$MAIL_USERNAME" \
             --from-literal=MAIL_PASSWORD="$MAIL_PASSWORD" \
             --from-literal=FASTAPI_SERVER_URL="$FASTAPI_SERVER_URL" \
+            --from-literal=FASTAPI_API_KEY="$FASTAPI_API_KEY" \
             --from-literal=NAVER_CLIENT_ID="$NAVER_CLIENT_ID" \
             --from-literal=NAVER_CLIENT_SECRET="$NAVER_CLIENT_SECRET"
       - name: Apply manifests

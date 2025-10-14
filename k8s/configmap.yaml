@@ -53,6 +53,7 @@ data:
     fastapi:
       server:
         url: ${FASTAPI_SERVER_URL}
+      api-key: ${FASTAPI_API_KEY}
     cloud:
       aws:
         region:
