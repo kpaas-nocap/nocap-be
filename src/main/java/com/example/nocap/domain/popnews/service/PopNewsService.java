@@ -43,7 +43,7 @@ public class PopNewsService {
         System.out.println("인기뉴스 크롤링이 수행됩니다.");
 
         // 배포시에는 살려야할 부분과 서버에 설치해야되는 것들
-        // System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
+         System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
         // sudo apt-get install -y chromium-browser
         // sudo apt-get install -y chromium-chromedriver
 
