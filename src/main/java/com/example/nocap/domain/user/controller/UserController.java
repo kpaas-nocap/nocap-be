@@ -19,14 +19,9 @@ public class UserController implements UserSwagger{
         return ResponseEntity.ok(userService.getMe());
     }
 
-    @PatchMapping("/change/password")
-    public ResponseEntity<String> changePassword(@RequestBody ChangepasswordRequest request){
-        userService.changePassword(request);
-        return ResponseEntity.ok("비밀번호 변경이 완료되었습니다.");
-    }
     @PatchMapping("/update")
     public ResponseEntity<UserDto> updateProfile(@RequestBody UserUpdateRequest request) {
-        return ResponseEntity.ok(userService.updateProfile(request));
+        return ResponseEntity.ok(userService.update(request));
     }
 
     @DeleteMapping("/delete")
