@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 
 public interface CommentMapper {
 
+    @Mapping(source = "user.username", target = "username")
     CommentResponseDto toCommentResponseDto(Comment comment);
     @Mapping(source = "analysis.analysisId", target = "analysisId")
     MyCommentResponseDto toMyCommentResponseDto(Comment comment);
