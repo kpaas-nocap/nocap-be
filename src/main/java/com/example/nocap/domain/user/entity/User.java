@@ -22,12 +22,18 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String userId;
+    @Column(nullable = false)
     private String userPw;
+
     private String username;
+    @Column(nullable = false)
     private String role;
+    @Column(nullable = false)
     private String userType;
-    private int point;
+    @Column(nullable = false, columnDefinition = "int default 10")
+    private int point = 10;
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
