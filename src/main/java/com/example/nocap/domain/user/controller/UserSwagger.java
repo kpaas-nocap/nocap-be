@@ -27,7 +27,16 @@ public interface UserSwagger {
                             description = "조회 성공",
                             content = @Content(
                                     schema = @Schema(implementation = UserDto.class),
-                                    examples = @ExampleObject(value = "{\n  \"id\": 1,\n  \"userId\": \"user@example.com\",\n  \"username\": \"MJU User\",\n  \"role\": \"ROLE_USER\"\n}")
+                                    examples = @ExampleObject(value = """
+                {
+                  "Id": 1,
+                  "userId": "user@example.com",
+                  "username": "MJU User",
+                  "role": "ROLE_USER",
+                  "userType": "KAKAO",
+                  "point": 10
+                }
+                """)
                             )
                     ),
                     @ApiResponse(
@@ -35,7 +44,12 @@ public interface UserSwagger {
                             description = "인증 실패 (토큰이 없거나 만료됨)",
                             content = @Content(
                                     schema = @Schema(implementation = ErrorCode.class),
-                                    examples = @ExampleObject(value = "{\n  \"status\": 401,\n  \"message\": \"인증이 필요한 요청입니다.\"\n}")
+                                    examples = @ExampleObject(value = """
+                {
+                  "status": 401,
+                  "message": "인증이 필요한 요청입니다."
+                }
+                """)
                             )
                     )
             }
