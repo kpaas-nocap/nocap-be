@@ -12,8 +12,6 @@ public interface HistoryMapper {
 
     History toHistory(HistoryRequestDto historyRequestDto);
 
-    @Mapping(target = "id", source = "id")
     HistorySummaryDto toHistorySummary(History history);
-    @Mapping(target = "id", source = "id")
     HistoryDetailDto toHistoryDetailDto(History history);
 }
