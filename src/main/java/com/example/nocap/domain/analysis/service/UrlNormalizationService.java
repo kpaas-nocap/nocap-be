@@ -19,8 +19,11 @@ public class UrlNormalizationService {
         if (urlString == null) {
             return null;
         }
+
+        String processedUrl = urlString.replaceAll("(://)(m|mobile|view)\\.", "://www.");
+
         try {
-            URL url = new URL(urlString);
+            URL url = new URL(processedUrl);
             String path = url.getPath();
             String query = url.getQuery();
 
@@ -31,7 +34,7 @@ public class UrlNormalizationService {
 
             // 2. 기사 식별에 필수적인 파라미터 목록
             List<String> essentialParams = List.of(
-                "article_id", "id", "no", "idx", "idxno", "pno", "newsid", "materialId" // ✨ idxno 추가
+                "article_id", "id", "no", "idx", "idxno", "pno", "newsid", "materialId"
             );
 
             // 3. 필수 파라미터만 남기고 정렬하여 새로운 쿼리 문자열 생성
