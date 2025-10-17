@@ -95,12 +95,14 @@ public class AnalysisService {
         if (mainNewsOpt.isPresent()) {
             // 뉴스가 존재할 경우
             MainNews mainNews = mainNewsOpt.get();
-            String analysisPlan = mainNews.getAnalysis().getPlan();
+            Analysis analysis = mainNews.getAnalysis();
+            String analysisPlan = analysis.getPlan();
 
             log.info("Analysis found for URL: {}. Plan: {}", url, analysisPlan);
 
             return IsAnalyzedDto.builder()
                 .isAnalyzed(true)
+                .analysisId(analysis.getAnalysisId())
                 .plan(analysisPlan)
                 .build();
         } else {
@@ -109,6 +111,7 @@ public class AnalysisService {
 
             return IsAnalyzedDto.builder()
                 .isAnalyzed(false)
+                .analysisId(null)
                 .plan(null) // 분석된 플랜이 없음
                 .build();
         }
