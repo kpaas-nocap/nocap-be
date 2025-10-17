@@ -1,5 +1,6 @@
 package com.example.nocap.domain.analysis.entity;
 
+import com.example.nocap.domain.bookmark.entity.Bookmark;
 import com.example.nocap.domain.comment.entity.Comment;
 import com.example.nocap.domain.mainnews.entity.MainNews;
 import com.example.nocap.domain.news.entity.News;
@@ -41,6 +42,10 @@ public class Analysis {
 
     @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL)
     private List<News> relatedNews;
+
+    @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Bookmark> bookmarks = new ArrayList<>();
 
     @OneToOne(mappedBy = "analysis", cascade = CascadeType.ALL)
     private MainNews mainNews;

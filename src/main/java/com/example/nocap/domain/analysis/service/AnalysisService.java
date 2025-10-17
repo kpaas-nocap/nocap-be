@@ -15,12 +15,14 @@ import com.example.nocap.domain.user.repository.UserRepository;
 import com.example.nocap.domain.useranalysis.entity.UserAnalysis;
 import com.example.nocap.exception.CustomException;
 import com.example.nocap.exception.ErrorCode;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -86,6 +88,13 @@ public class AnalysisService {
     @Transactional
     public void deleteAnalysisById(Long id) {
         analysisRepository.deleteById(id);
+    }
+
+    @Scheduled(cron = "0 0 4 * * ?")
+    @Transactional
+    public void cleanupOldAnalyses() {
+        LocalDateTime threshold = LocalDateTime.now().minusWeeks(2);
+        analysisRepository.deleteByDateBefore(threshold);
     }
 
     public IsAnalyzedDto isAnalyzed(String url) {
