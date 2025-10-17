@@ -11,6 +11,7 @@ import com.example.nocap.domain.analysis.dto.SbertResponseDto;
 import com.example.nocap.domain.analysis.dto.TitleCategoryDto;
 import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.domain.analysis.mapper.AnalysisMapper;
+import com.example.nocap.domain.bookmark.repository.BookmarkRepository;
 import com.example.nocap.domain.mainnews.entity.MainNews;
 import com.example.nocap.domain.mainnews.mapper.MainNewsMapper;
 import com.example.nocap.domain.mainnews.repository.MainNewsRepository;
@@ -39,11 +40,13 @@ public class AnalysisProcessService {
     private final NaverNewsService naverNewsService;
     private final CrawlingService crawlingService;
     private final AnalysisSaveService analysisSaveService;
+    private final AnalysisUpdateService analysisUpdateService;
     private final NewsMapper newsMapper;
     private final MainNewsMapper mainNewsMapper;
     private final AnalysisMapper analysisMapper;
     private final MainNewsRepository mainNewsRepository;
     private final UserRepository userRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final UrlNormalizationService urlNormalizationService;
 
     // Fast API 서버 호출용 추가 의존성
@@ -92,41 +95,59 @@ public class AnalysisProcessService {
             .image(requestNews.getImage())
             .build();
 
+        Optional<MainNews> existingMainNewsOpt = mainNewsRepository.findByCanonicalUrl(
+            mainNews.getCanonicalUrl());
+        log.info("Canonical url: " + mainNews.getCanonicalUrl());
 
-        // DB에서 canonicalUrl로 기존 MainNews를 찾아옴
-        // 일반분석된 뉴스를 일반분석 시도하는 경우와
-        // 프리미엄 분석된 뉴스를 프리미엄 분석 시도하는 경우
-        Optional<MainNews> existingMainNewsOpt = mainNewsRepository.findByCanonicalUrl(mainNews.getCanonicalUrl());
-        if (existingMainNewsOpt.isPresent() &&
-            plan.equals(existingMainNewsOpt.get().getAnalysis().getPlan())) {
+        Analysis finalAnalysis;
 
-            throw new CustomException(ErrorCode.ALREADY_ANALYZED_NEWS);
+        if (existingMainNewsOpt.isPresent()) {
+            log.info("existing analysis...");
+            MainNews existingMainNews = existingMainNewsOpt.get();
+            Analysis existingAnalysis = existingMainNews.getAnalysis();
+
+            if (plan.equals(existingAnalysis.getPlan())) {
+                throw new CustomException(ErrorCode.ALREADY_ANALYZED_NEWS);
+            }
+            if (plan.equals("PREMIUM") && !user.getRole().equals("PREMIUM")) {
+                usePoint(user);
+            }
+            SbertResponseDto sbertResponseDto = performExternalAnalysis(mainNews, plan);
+            analysisUpdateService.updateAnalysisData(existingAnalysis, plan, sbertResponseDto);
+            finalAnalysis = existingAnalysis;
+
+        } else {
+            log.info("new analysis...");
+            if (plan.equals("PREMIUM") && !user.getRole().equals("PREMIUM")) {
+                usePoint(user);
+            }
+            SbertResponseDto sbertResponseDto = performExternalAnalysis(mainNews, plan);
+            finalAnalysis = analysisSaveService.saveAnalysisData(userId, plan, mainNews, sbertResponseDto);
         }
 
-        // 일반유저가 프리미엄 분석을 요청하면 포인트 차감
-        if (plan.equals("PREMIUM") && !user.getRole().equals("PREMIUM")) {
-            usePoint(user);
-        }
+        boolean isBookmarked = bookmarkRepository.findByUserAndAnalysis(user, finalAnalysis).isPresent();
 
-        // 2. OpenAI로 새 제목/카테고리 생성
+        // 5. 최종 DTO로 변환하여 반환
+        return analysisMapper.toAnalysisViewDto(finalAnalysis, isBookmarked);
+    }
+
+    private SbertResponseDto performExternalAnalysis(MainNews mainNews, String plan) throws JsonProcessingException {
+        // OpenAI로 키워드/카테고리 생성
         TitleCategoryDto titleCategoryDto = openAIService.generate(mainNews.getContent());
-
         log.info("관련 뉴스 검색 키워드: {}", titleCategoryDto.getTitle());
-        log.info("분석 카테고리: {}", titleCategoryDto.getCategory());
 
-        // 3. 새 제목으로 관련 뉴스 검색
+        // 키워드로 관련 뉴스 검색
         NewsSearchRequestDto newsSearchRequestDto = NewsSearchRequestDto.builder()
             .rawKeyword(titleCategoryDto.getTitle())
             .excludeTitle(mainNews.getTitle())
             .excludeUrl(mainNews.getUrl())
             .build();
         NewsSearchResponseDto searchResult = naverNewsService.searchNewsDto(newsSearchRequestDto);
-        log.info("네이버 뉴스 API 호출 시간: {}", searchResult.getLastBuildDate());
 
-        // 4. 검색된 뉴스들 크롤링
+        // 검색된 뉴스들 크롤링
         CrawledResponseDto crawledResponseDto = crawlingService.crawlNews(searchResult);
 
-        // 5. 최종 DTO 빌드
+        // FastAPI 요청 DTO 빌드
         SbertRequestDto sbertRequestDto = SbertRequestDto.builder()
             .plan(plan)
             .category(titleCategoryDto.getCategory())
@@ -134,19 +155,13 @@ public class AnalysisProcessService {
             .newsDtos(crawledResponseDto.getNewsDtos())
             .build();
 
-        ObjectMapper mapper = new ObjectMapper();
-        log.info("Request JSON: {}", mapper.writeValueAsString(sbertRequestDto));
+        log.info("Request JSON to FastAPI: {}", new ObjectMapper().writeValueAsString(sbertRequestDto));
 
-        // 6. FastAPI 호출
-        SbertResponseDto sbertResponseDto = requestFastAPi(sbertRequestDto);
-        assert sbertResponseDto != null;
-        Analysis analysis = analysisSaveService.saveAnalysisData(userId, plan, mainNews,
-            sbertResponseDto);
-
-        return analysisMapper.toAnalysisViewDto(analysis, false);
+        // FastAPI 호출
+        return requestFastAPI(sbertRequestDto);
     }
 
-    private SbertResponseDto requestFastAPi(SbertRequestDto sbertRequestDto) {
+    private SbertResponseDto requestFastAPI(SbertRequestDto sbertRequestDto) {
         SbertResponseDto sbertResponseDto;
 
         try {
