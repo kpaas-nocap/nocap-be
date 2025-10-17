@@ -78,7 +78,7 @@ public class QuestionService {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        if (!user.getRole().equals("ADMIN")) {
+        if (!user.getRole().equals("ROLE_ADMIN")) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
         List<Question> questionList = questionRepository.findAll();
@@ -95,7 +95,7 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId)
             .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
-        if (!user.getRole().equals("ADMIN")) {
+        if (!user.getRole().equals("ROLE_ADMIN")) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
@@ -114,7 +114,7 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId)
             .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
-        if (!user.getRole().equals("ADMIN")) {
+        if (!user.getRole().equals("ROLE_ADMIN")) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 

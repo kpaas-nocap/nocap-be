@@ -3,6 +3,7 @@ package com.example.nocap.domain.comment.controller;
 import com.example.nocap.auth.dto.response.UserDetail;
 import com.example.nocap.domain.comment.dto.CommentRequestDto;
 import com.example.nocap.domain.comment.dto.CommentResponseDto;
+import com.example.nocap.domain.comment.dto.CommentSummaryDto;
 import com.example.nocap.domain.comment.dto.MyCommentResponseDto;
 import com.example.nocap.domain.comment.dto.RecommendDto;
 import com.example.nocap.domain.comment.service.CommentService;
@@ -78,7 +79,38 @@ public class CommentController {
         responses = { /* ... */ }
     )
     @PostMapping("/recommend")
-    public ResponseEntity<CommentResponseDto> RecommendComment(@RequestBody RecommendDto recommendDto, @AuthenticationPrincipal UserDetail userDetail) {
+    public ResponseEntity<CommentResponseDto> recommendComment(@RequestBody RecommendDto recommendDto, @AuthenticationPrincipal UserDetail userDetail) {
         return ResponseEntity.ok(commentService.recommendComment(recommendDto, userDetail));
+    }
+
+    @Operation(
+        summary = "댓글 신고",
+        description = "댓글 아이디를 통해 신고",
+        responses = { /* ... */ }
+    )
+    @PostMapping("/report/{commentId}")
+    public ResponseEntity<Void> reportComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal UserDetail userDetail) {
+        commentService.reportComment(commentId, userDetail);
+        return ResponseEntity.noContent().build();
+    }
+    @Operation(
+        summary = "관리자의 전체 신고댓글 조회",
+        description = "관리자가 전체 신고댓글을 조회",
+        responses = { /* ... */ }
+    )
+    @GetMapping("/admin")
+    public ResponseEntity<List<CommentSummaryDto>> getReportedComments(@AuthenticationPrincipal UserDetail userDetail) {
+        return ResponseEntity.ok(commentService.getReportedComments(userDetail));
+    }
+
+    @Operation(
+        summary = "관리자의 댓글 삭제",
+        description = "관리자가 특정 댓글을 삭제",
+        responses = { /* ... */ }
+    )
+    @DeleteMapping("/admin/{commentId}")
+    public ResponseEntity<Void> deleteReportedComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal UserDetail userDetail) {
+        commentService.deleteReportedComment(commentId, userDetail);
+        return ResponseEntity.noContent().build();
     }
 }

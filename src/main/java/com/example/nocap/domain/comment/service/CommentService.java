@@ -5,6 +5,7 @@ import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.domain.analysis.repository.AnalysisRepository;
 import com.example.nocap.domain.comment.dto.CommentRequestDto;
 import com.example.nocap.domain.comment.dto.CommentResponseDto;
+import com.example.nocap.domain.comment.dto.CommentSummaryDto;
 import com.example.nocap.domain.comment.dto.MyCommentResponseDto;
 import com.example.nocap.domain.comment.dto.RecommendDto;
 import com.example.nocap.domain.comment.dto.RecommendType;
@@ -13,6 +14,7 @@ import com.example.nocap.domain.comment.entity.CommentRecommendation;
 import com.example.nocap.domain.comment.mapper.CommentMapper;
 import com.example.nocap.domain.comment.repository.CommentRecommendationRepository;
 import com.example.nocap.domain.comment.repository.CommentRepository;
+import com.example.nocap.domain.question.entity.Question;
 import com.example.nocap.domain.user.entity.User;
 import com.example.nocap.domain.user.repository.UserRepository;
 import com.example.nocap.exception.CustomException;
@@ -23,6 +25,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.control.MappingControl.Use;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -137,5 +140,37 @@ public class CommentService {
         }
 
         return commentMapper.toCommentResponseDto(comment);
+    }
+
+    @Transactional
+    public void reportComment(Long commentId, UserDetail userDetail) {
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+        comment.setReported(true);
+    }
+
+    public List<CommentSummaryDto> getReportedComments(UserDetail userDetail) {
+        Long id = userDetail.getId();
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (!user.getRole().equals("ROLE_ADMIN")) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+        return commentMapper.toCommentSummaryDtoList(commentRepository.findByReportedTrue());
+    }
+
+    @Transactional
+    public void deleteReportedComment(Long commentId, UserDetail userDetail) {
+        Long id = userDetail.getId();
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (!user.getRole().equals("ROLE_ADMIN")) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+        commentRepository.delete(comment);
     }
 }
