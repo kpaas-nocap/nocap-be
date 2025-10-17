@@ -15,12 +15,14 @@ import com.example.nocap.domain.user.repository.UserRepository;
 import com.example.nocap.domain.useranalysis.entity.UserAnalysis;
 import com.example.nocap.exception.CustomException;
 import com.example.nocap.exception.ErrorCode;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -88,6 +90,13 @@ public class AnalysisService {
         analysisRepository.deleteById(id);
     }
 
+    @Scheduled(cron = "0 0 4 * * ?")
+    @Transactional
+    public void cleanupOldAnalyses() {
+        LocalDateTime threshold = LocalDateTime.now().minusWeeks(2);
+        analysisRepository.deleteByDateBefore(threshold);
+    }
+
     public IsAnalyzedDto isAnalyzed(String url) {
         String normalizedUrl = urlNormalizationService.normalize(url);
         Optional<MainNews> mainNewsOpt = mainNewsRepository.findFirstByUrlOrCanonicalUrl(url, normalizedUrl);
@@ -95,12 +104,14 @@ public class AnalysisService {
         if (mainNewsOpt.isPresent()) {
             // 뉴스가 존재할 경우
             MainNews mainNews = mainNewsOpt.get();
-            String analysisPlan = mainNews.getAnalysis().getPlan();
+            Analysis analysis = mainNews.getAnalysis();
+            String analysisPlan = analysis.getPlan();
 
             log.info("Analysis found for URL: {}. Plan: {}", url, analysisPlan);
 
             return IsAnalyzedDto.builder()
                 .isAnalyzed(true)
+                .analysisId(analysis.getAnalysisId())
                 .plan(analysisPlan)
                 .build();
         } else {
@@ -109,6 +120,7 @@ public class AnalysisService {
 
             return IsAnalyzedDto.builder()
                 .isAnalyzed(false)
+                .analysisId(null)
                 .plan(null) // 분석된 플랜이 없음
                 .build();
         }

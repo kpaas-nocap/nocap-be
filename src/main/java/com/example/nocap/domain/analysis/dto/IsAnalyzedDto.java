@@ -8,6 +8,7 @@ import lombok.Data;
 public class IsAnalyzedDto {
 
     private boolean isAnalyzed;
+    private Long analysisId;
     private String plan;
 
 }

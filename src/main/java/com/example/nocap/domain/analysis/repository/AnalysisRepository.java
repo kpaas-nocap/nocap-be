@@ -3,6 +3,7 @@ package com.example.nocap.domain.analysis.repository;
 import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.domain.mainnews.entity.MainNews;
 import com.example.nocap.domain.user.entity.User;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,6 @@ public interface AnalysisRepository extends JpaRepository<Analysis, Long> {
     List<Analysis> findAllByUserId(@Param("userId") Long userId);
 
     Optional<Analysis> findByMainNews(MainNews mainNews);
+
+    void deleteByDateBefore(LocalDateTime threshold);
 }
