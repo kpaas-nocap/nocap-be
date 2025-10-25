@@ -100,6 +100,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/nocap/analysis","/api/nocap/comment/get/**").permitAll()
                         .requestMatchers(ALLOWED_URLS).permitAll()
                         .requestMatchers("/api/nocap/question/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/nocap/comment/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint()))
