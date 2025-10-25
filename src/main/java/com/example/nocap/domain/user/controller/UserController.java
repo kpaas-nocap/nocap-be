@@ -29,4 +29,5 @@ public class UserController implements UserSwagger{
         userService.deleteMe();
         return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
+    //메일설정적용을위한 공백
 }
