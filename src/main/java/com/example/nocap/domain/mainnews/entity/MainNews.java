@@ -2,6 +2,7 @@ package com.example.nocap.domain.mainnews.entity;
 
 import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.global.StringListConverter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -27,6 +28,7 @@ public class MainNews {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long newsId;
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "AnalysisID", nullable = false)
     private Analysis analysis;
