@@ -2,6 +2,7 @@ package com.example.nocap.domain.bookmark.entity;
 
 import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.domain.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class Bookmark {
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "AnalysisID", nullable = false)
     private Analysis analysis;
