@@ -2,6 +2,7 @@ package com.example.nocap.domain.comment.entity;
 
 import com.example.nocap.domain.analysis.entity.Analysis;
 import com.example.nocap.domain.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,6 +28,7 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentId;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "AnalysisID", nullable = false)
     private Analysis analysis;
