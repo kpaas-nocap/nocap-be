@@ -11,6 +11,7 @@ import com.example.nocap.domain.user.entity.User;
 import com.example.nocap.domain.user.repository.UserRepository;
 import com.example.nocap.exception.CustomException;
 import com.example.nocap.exception.ErrorCode;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,6 @@ public class HistoryService {
 
     private static final int MAX_HISTORY_COUNT = 10; // 최대 히스토리 개수 상수로 관리
 
-
     @Transactional
     public HistoryRequestDto saveHistory(HistoryRequestDto historyRequestDto, UserDetail userDetail) {
 
@@ -35,21 +35,27 @@ public class HistoryService {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        History history = historyMapper.toHistory(historyRequestDto);
-        history.setUser(user);
-        historyRepository.save(history);
+        String url = historyRequestDto.getUrl();
+        History existingHistory = historyRepository.findByUserAndUrl(user, url).orElse(null);
+        if (existingHistory != null) {
+            existingHistory.setCreatedAt(LocalDateTime.now());
+            historyRepository.save(existingHistory);
+        } else {
+            History history = historyMapper.toHistory(historyRequestDto);
+            history.setUser(user);
+            historyRepository.save(history);
 
-        // 해당 사용자의 히스토리 총 개수 확인
-        long historyCount = historyRepository.countByUser(user);
+            // 해당 사용자의 히스토리 총 개수 확인
+            long historyCount = historyRepository.countByUser(user);
 
-        // 히스토리 개수가 최대 개수를 초과하면
-        if (historyCount > MAX_HISTORY_COUNT) {
-            // 가장 오래된 히스토리 1개를 찾아서
-            // 5. 삭제
-            historyRepository.findFirstByUserOrderByCreatedAtAsc(user)
-                .ifPresent(historyRepository::delete);
+            // 히스토리 개수가 최대 개수를 초과하면
+            if (historyCount > MAX_HISTORY_COUNT) {
+                // 가장 오래된 히스토리 1개를 찾아서
+                // 삭제
+                historyRepository.findFirstByUserOrderByCreatedAtAsc(user)
+                    .ifPresent(historyRepository::delete);
+            }
         }
-
         return historyRequestDto;
     }
 
