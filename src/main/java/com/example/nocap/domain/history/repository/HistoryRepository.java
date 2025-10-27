@@ -15,4 +15,6 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 
     // 특정 사용자의 히스토리 중 createdAt을 기준으로 오름차순 정렬하여 첫 번째 것을 찾는 메소드
     Optional<History> findFirstByUserOrderByCreatedAtAsc(User user);
+
+    Optional<History> findByUserAndUrl(User user, String url);
 }
