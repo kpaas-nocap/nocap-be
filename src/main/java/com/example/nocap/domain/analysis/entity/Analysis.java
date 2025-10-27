@@ -8,22 +8,24 @@ import com.example.nocap.domain.user.entity.User;
 import com.example.nocap.domain.useranalysis.entity.UserAnalysis;
 import jakarta.persistence.*;
 import java.util.ArrayList;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"mainNews", "relatedNews", "comments", "userAnalyses", "bookmarks"})
 public class Analysis {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long analysisId;
 
     @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL, orphanRemoval = true)
