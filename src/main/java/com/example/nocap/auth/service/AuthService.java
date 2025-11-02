@@ -64,6 +64,7 @@ public class AuthService {
                 .userPw(passwordEncoder.encode(UUID.randomUUID().toString()))
                 .role("USER")
                 .userType("KAKAO")
+                .point(10)
                 .build();
 
         userRepository.save(newUser);
@@ -82,6 +83,7 @@ public class AuthService {
                 .userPw(passwordEncoder.encode(req.getPassword()))
                 .role("USER")
                 .userType("FORM")
+                .point(10)
                 .build();
         userRepository.save(newUser);
         String token = jwtUtil.createJwt(newUser, 60 * 60 * 1000L);
