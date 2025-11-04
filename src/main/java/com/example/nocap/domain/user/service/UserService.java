@@ -40,6 +40,7 @@ public class UserService {
                 .username(user.getUsername())
                 .role(user.getRole())
                 .point(user.getPoint())
+                .userType(user.getUserType())
                 .build();
     }
 
